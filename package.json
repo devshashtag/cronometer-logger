@@ -1,0 +1,20 @@
+{
+  "name": "timer-plus",
+  "version": "1.0.0",
+  "description": "timer+ is a simple timer with history",
+  "main": "index.js",
+  "scripts": {
+    "sass": "sass --watch assets/scss/styles.scss assets/css/styles.css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DevsHashtag/timer-plus.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DevsHashtag/timer-plus/issues"
+  },
+  "homepage": "https://github.com/DevsHashtag/timer-plus#readme"
+}
