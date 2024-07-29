@@ -1,0 +1,3 @@
+.date::before {
+  content: attr(data-year) '/' attr(data-month) '/' attr(data-day);
+}

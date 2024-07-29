@@ -1,0 +1,120 @@
+main.main {
+  max-width: $max-width;
+  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  padding: 2rem;
+
+  // cronometer
+  section.main__cronometer {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  // display
+  .cronometer__display {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 0 10rem $theme-gray-3 inset, 0 0 2rem $theme-gray-5;
+    padding: 2rem 1rem;
+    border-radius: 3rem;
+
+    > div {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      font-size: 3rem;
+      color: $theme-yellow;
+    }
+  }
+
+  // controls
+  .cronometer__controls {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem 1rem;
+    border-radius: 3rem;
+    margin: 2rem 10rem;
+    border-top: 0.2rem dashed $theme-gray-6;
+    border-bottom: 0.2rem dashed $theme-gray-6;
+
+    i {
+      cursor: pointer;
+      font-size: 4rem;
+    }
+  }
+
+  // history
+  .cronometer__history {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: 0 0 10rem $theme-gray-3 inset;
+    padding: 2rem 1rem;
+    border-radius: 1rem;
+    font-size: 3rem;
+    overflow-y: scroll;
+  }
+
+  // item
+  .history__item {
+    display: flex;
+    flex-direction: column;
+    background-color: $theme-gray-3;
+    border-radius: 1rem;
+  }
+
+  // display
+  .history__display {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+
+    color: $theme-yellow;
+
+    .records {
+      color: $theme-red;
+    }
+  }
+  // list
+  .history__list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: all $transition-duration linear;
+    // hidden
+    overflow: hidden;
+    opacity: 0;
+    visibility: none;
+    height: 0;
+  }
+
+  .history__list.active {
+    opacity: 1;
+    visibility: visible;
+    height: auto;
+    padding: 1rem;
+  }
+
+  // item
+  .list__item {
+    text-align: center;
+    .start {
+      color: $theme-green;
+    }
+    .end {
+      color: $theme-red;
+    }
+    .duration {
+      color: $theme-cyan;
+    }
+  }
+}

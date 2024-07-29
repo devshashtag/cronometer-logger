@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- title -->
-    <title>timer plus</title>
+    <title>cronometer plus</title>
+
+    <!-- font awesome -->
+    <link href="https://use.fontawesome.com/releases/v5.15.1/css/all.css" rel="stylesheet" />
 
     <!-- styles -->
     <link rel="stylesheet" href="/assets/css/styles.css" />
@@ -16,7 +19,68 @@
     <header class="header"></header>
 
     <!-- main -->
-    <main class="main"></main>
+    <main class="main">
+      <section class="main__cronometer">
+        <div class="cronometer__display">
+          <div class="time" id="cronometer" data-hour="00" data-minute="00" data-seconds="00"></div>
+          <div class="date" id="date" data-year="1403" data-month="05" data-day="08"></div>
+
+          <div class="cronometer__controls">
+            <i class="fa fa-play" id="play"></i>
+            <i class="fa fa-stop" id="stop"></i>
+          </div>
+        </div>
+
+        <div class="cronometer__history">
+          <!-- item -->
+          <div class="history__item">
+            <!-- display -->
+            <div class="history__display">
+              <span class="date" data-year="1403" data-month="05" data-day="08"></span>
+              <span class="time total" data-hour="04" data-minute="10" data-seconds="03"></span>
+              <span class="records" data-records="5"></span>
+            </div>
+            <!-- list -->
+            <div class="history__list active">
+              <!-- item -->
+              <div class="list__item">
+                <span class="time start" data-hour="04" data-minute="10" data-seconds="03"></span>
+                <span class="time end" data-hour="04" data-minute="15" data-seconds="03"></span>
+                <span class="time duration" data-hour="00" data-minute="05" data-seconds="00"></span>
+              </div>
+
+              <!-- item -->
+              <div class="list__item">
+                <span class="time start" data-hour="04" data-minute="10" data-seconds="03"></span>
+                <span class="time end" data-hour="04" data-minute="15" data-seconds="03"></span>
+                <span class="time duration" data-hour="00" data-minute="05" data-seconds="00"></span>
+              </div>
+
+              <!-- item -->
+              <div class="list__item">
+                <span class="time start" data-hour="04" data-minute="10" data-seconds="03"></span>
+                <span class="time end" data-hour="04" data-minute="15" data-seconds="03"></span>
+                <span class="time duration" data-hour="00" data-minute="05" data-seconds="00"></span>
+              </div>
+
+              <!-- item -->
+              <div class="list__item">
+                <span class="time start" data-hour="04" data-minute="10" data-seconds="03"></span>
+                <span class="time end" data-hour="04" data-minute="15" data-seconds="03"></span>
+                <span class="time duration" data-hour="00" data-minute="05" data-seconds="00"></span>
+              </div>
+
+              <!-- item -->
+              <div class="list__item">
+                <span class="time start" data-hour="04" data-minute="10" data-seconds="03"></span>
+                <span class="time end" data-hour="04" data-minute="15" data-seconds="03"></span>
+                <span class="time duration" data-hour="00" data-minute="05" data-seconds="00"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
 
     <!-- scripts -->
     <script type="module" src="/assets/js/script.js"></script>

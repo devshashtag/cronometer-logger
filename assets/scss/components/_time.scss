@@ -1,0 +1,3 @@
+.time::before {
+  content: attr(data-hour) ':' attr(data-minute) ':' attr(data-seconds);
+}
