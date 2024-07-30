@@ -1,54 +1,110 @@
-import { getDate, timeToSeconds, secondsToTime } from '/assets/js/modules/functions.js';
+import { getDate, getTime, timeToSeconds, secondsToTime } from '/assets/js/modules/functions.js';
 import { storage } from '/assets/js/script.js';
 
 class Interface {
   constructor() {
-    this.cronometer = document.getElementById('cronometer');
-    this.date = document.getElementById('date');
+    this.cronometerElm = document.getElementById('cronometer');
+    this.dateElm = document.getElementById('date');
+    this.playBtn = document.getElementById('play');
+    this.stopBtn = document.getElementById('stop');
+    this.historyElm = document.querySelector('.cronometer__history');
 
-    this.btnPlay = document.getElementById('play');
-    this.btnStop = document.getElementById('stop');
-    this.config = { playing: false };
+    // load ui
+    this.loadCronometer();
 
-    // events
-    this.btnPlay.addEventListener('click', this.play);
+    // play event
+    this.playBtn.addEventListener('click', this.play);
   }
+
+  loadCronometer() {
+    this.setDate(this.dateElm, storage.getDate());
+    this.setTime(this.cronometerElm, secondsToTime(storage.getDurations()));
+
+    for (const date in storage.getHistory()) {
+      // event: history toggle item
+      this.historyListElm = this.getHistoryList(date);
+      this.historyListElm.parentNode.parentNode.addEventListener('click', this.toggleHistoryItems);
+
+      for (const record of storage.getRecords(date)) {
+        const item = this.getHistoryListItem(record.start, record.end);
+        this.historyListElm.insertAdjacentHTML('afterbegin', item);
+      }
+
+      // set total durations and records
+      this.setHistoryTitle(date);
+    }
+
+    this.historyListElm = this.getHistoryList(storage.getDate());
+
+    // start cronometer if running
+    if (storage.isRunning()) {
+      this.interval = setInterval(() => {
+        this.setTime(this.cronometerElm, storage.getCurrentTime());
+      }, 100);
+
+      // toggle to running
+      this.playBtn.classList.add('fa-pause');
+      this.cronometerElm.classList.add('fa-play');
+      this.playBtn.classList.remove('fa-play');
+      this.cronometerElm.classList.remove('fa-pause');
+    }
+  }
+
+  toggleHistoryItems = (e) => {
+    if (e.target.classList.contains('history__item')) {
+      e.target.querySelector('.history__list').classList.toggle('active');
+    }
+  };
 
   play = () => {
-    if (!this.config.playing) {
-      this.config.playing = true;
+    if (!storage.isRunning()) {
+      storage.toggleRunning();
+
+      const time = getTime();
+      storage.setStartTime(time);
+
+      this.interval = setInterval(() => {
+        this.setTime(this.cronometerElm, storage.getCurrentTime());
+      }, 100);
     } else {
-      this.config.playing = false;
       // stop cronometer
+      storage.toggleRunning();
+      clearInterval(this.interval);
+
+      // add record
+      this.addRecord();
     }
 
-    this.playCronometer();
+    // toggle play/pause
+    this.playBtn.classList.toggle('fa-play');
+    this.playBtn.classList.toggle('fa-pause');
+    // toggle color of cronometer
+    this.cronometerElm.classList.toggle('fa-play');
+    this.cronometerElm.classList.toggle('fa-pause');
   };
 
-  playCronometer() {
-    const { hour, minute, seconds } = this.cronometer.dataset;
-    this.config.cronometerTime = timeToSeconds(`${hour}:${minute}:${seconds}`);
+  addRecord() {
+    // add record
+    const historyListItem = this.getHistoryListItem(storage.getStartTime(), storage.getEndTime(), true);
+    this.historyListElm.insertAdjacentHTML('afterbegin', historyListItem);
 
-    if (this.config.playing) {
-      const { date, time } = getDate();
-
-      this.config.date = date;
-      this.config.start = timeToSeconds(time);
-      console.log(this.config);
-
-      this.config.interval = setInterval(this.cornometerInterval, 100);
-    } else {
-      clearInterval(this.config.interval);
-    }
+    // set total durations and records
+    this.setHistoryTitle();
   }
 
-  cornometerInterval = () => {
-    const { date, time } = getDate();
-    this.config.end = time;
+  setHistoryTitle(date) {
+    // set total durations and records
+    const [dh, dm, ds] = secondsToTime(storage.getDurations(date)).split(':');
+    const records = storage.getNumberOfRecords(date);
 
-    const timer = secondsToTime(timeToSeconds(time) - this.config.start + this.config.cronometerTime);
-    this.setTime(this.cronometer, timer);
-  };
+    // total durations
+    this.historyListElm.parentNode.dataset.hour = dh;
+    this.historyListElm.parentNode.dataset.minute = dm;
+    this.historyListElm.parentNode.dataset.seconds = ds;
+
+    // number of records
+    this.historyListElm.parentNode.dataset.records = records;
+  }
 
   setTime(elm, time) {
     const [hour, minute, seconds] = time.split(':');
@@ -62,6 +118,48 @@ class Interface {
     elm.dataset.year = year;
     elm.dataset.month = month;
     elm.dataset.day = day;
+  }
+
+  getHistoryList(date) {
+    const [year, month, day] = date.split('/');
+    let historyList = document.querySelector(`.history[data-year="${year}"][data-month="${month}"][data-day="${day}"] .history__list`);
+
+    if (!historyList) {
+      this.historyElm.insertAdjacentHTML(
+        'afterbegin',
+        `<!-- item -->
+        <div class="history history__item"
+        data-year="${year}" data-month="${month}" data-day="${day}"
+        data-hour="00" data-minute="00" data-seconds="00"
+        data-records="0">
+          <!-- list -->
+          <div class="history__list"></div>
+        </div>`
+      );
+
+      historyList = document.querySelector(`.history[data-year="${year}"][data-month="${month}"][data-day="${day}"] .history__list`);
+    }
+
+    return historyList;
+  }
+
+  getHistoryListItem(start, end, saveItem = false) {
+    const [sh, sm, ss] = secondsToTime(start).split(':');
+    const [eh, em, es] = secondsToTime(end).split(':');
+    const [dh, dm, ds] = secondsToTime(end - start).split(':');
+
+    const historyItem = `
+    <!-- item -->
+    <div class="list__item">
+      <span class="time start" data-hour="${sh}" data-minute="${sm}" data-seconds="${ss}"></span>
+      <span class="time end" data-hour="${eh}" data-minute="${em}" data-seconds="${es}"></span>
+      <span class="time duration" data-hour="${dh}" data-minute="${dm}" data-seconds="${ds}"></span>
+    </div>`;
+
+    // add record
+    if (saveItem) storage.addRecord(start, end);
+
+    return historyItem;
   }
 
   // // group list
