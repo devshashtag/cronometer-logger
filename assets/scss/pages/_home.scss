@@ -13,22 +13,32 @@ main.main {
     gap: 2rem;
   }
 
+  // container
+  .cronometer__container {
+    flex: 0.5;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 0 2rem $theme-gray-3 inset, 0 0 1rem $theme-gray-5;
+    padding: 2rem 1rem;
+    border-radius: 1rem;
+  }
+
   // display
   .cronometer__display {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    box-shadow: 0 0 10rem $theme-gray-3 inset, 0 0 2rem $theme-gray-5;
+    align-items: center;
+    gap: 1rem;
     padding: 2rem 1rem;
-    border-radius: 3rem;
+    font-size: 4rem;
 
-    > div {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 1rem;
-      font-size: 3rem;
-      color: $theme-yellow;
+    color: $theme-green;
+
+    .date {
+      font-size: 2rem;
+      color: $theme-gray-9;
     }
   }
 
@@ -36,17 +46,31 @@ main.main {
   .cronometer__controls {
     display: flex;
     justify-content: center;
-    gap: 2rem;
-    padding: 2rem 1rem;
+    gap: 5rem;
+    border: 1px solid $theme-red;
     border-radius: 3rem;
-    margin: 2rem 10rem;
+    margin: 1rem auto;
     border-top: 0.2rem dashed $theme-gray-6;
     border-bottom: 0.2rem dashed $theme-gray-6;
+    padding: 2rem 5rem;
 
     i {
       cursor: pointer;
-      font-size: 4rem;
+      font-size: 3rem;
     }
+  }
+
+  // colors
+  .fa-play {
+    color: $theme-green;
+  }
+
+  .fa-pause {
+    color: $theme-orange;
+  }
+
+  .fa-stop {
+    color: $theme-red;
   }
 
   // history
@@ -58,7 +82,7 @@ main.main {
     box-shadow: 0 0 10rem $theme-gray-3 inset;
     padding: 2rem 1rem;
     border-radius: 1rem;
-    font-size: 3rem;
+    font-size: 2rem;
     overflow-y: scroll;
   }
 
@@ -68,6 +92,8 @@ main.main {
     flex-direction: column;
     background-color: $theme-gray-3;
     border-radius: 1rem;
+
+    box-shadow: 0 0 1rem $theme-gray-7;
   }
 
   // display
@@ -79,40 +105,43 @@ main.main {
     padding: 1rem;
 
     color: $theme-yellow;
-
-    .records {
-      color: $theme-red;
-    }
   }
+
   // list
   .history__list {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.5rem;
     transition: all $transition-duration linear;
     // hidden
     overflow: hidden;
     opacity: 0;
-    visibility: none;
+    visibility: hidden;
     height: 0;
   }
 
-  .history__list.active {
+  .history__list.active:not(:empty) {
     opacity: 1;
     visibility: visible;
     height: auto;
-    padding: 1rem;
+    padding: 0 1rem 1rem;
   }
 
   // item
   .list__item {
     text-align: center;
+    background-color: $theme-gray-2;
+    padding: 1rem;
+    border-radius: 1rem;
+
     .start {
       color: $theme-green;
     }
+
     .end {
       color: $theme-red;
     }
+
     .duration {
       color: $theme-cyan;
     }
