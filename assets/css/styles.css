@@ -1,0 +1,245 @@
+*,
+::after,
+::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border: none;
+  outline: none;
+}
+
+li {
+  list-style-type: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+img,
+video {
+  width: 100%;
+  height: 100%;
+}
+
+button {
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: auto;
+  overflow: visible;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: normal;
+  -webkit-font-smoothing: inherit;
+  -moz-osx-font-smoothing: inherit;
+  appearance: none;
+}
+
+::-webkit-scrollbar {
+  cursor: default;
+  background-color: transparent;
+  height: 0.8rem;
+  width: 0.8rem;
+}
+
+::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  cursor: pointer;
+  border-radius: 1rem;
+  background-color: #808080;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #808080;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: #808080;
+}
+
+.no-select, button {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.no-select:focus, button:focus {
+  outline: none !important;
+}
+
+html {
+  height: 100%;
+  font-size: 0.5rem;
+}
+@media (min-width: 576px) {
+  html {
+    font-size: 0.625rem;
+  }
+}
+@media (min-width: 768px) {
+  html {
+    font-size: 0.75rem;
+  }
+}
+
+body {
+  height: 100%;
+  background-color: #303030;
+  color: #e0e0e0;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.6rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.time::before {
+  content: attr(data-hour) ":" attr(data-minute) ":" attr(data-seconds);
+}
+
+.date::before {
+  content: attr(data-year) " / " attr(data-month) " / " attr(data-day);
+}
+
+.records::before {
+  content: attr(data-records);
+}
+
+.history::before {
+  content: attr(data-year) "/" attr(data-month) "/" attr(data-day) " " attr(data-hour) ":" attr(data-minute) ":" attr(data-seconds) " " attr(data-records);
+  cursor: pointer;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ffea8a;
+  pointer-events: auto;
+}
+
+main.main {
+  max-width: 1980px;
+  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  padding: 2rem;
+}
+main.main section.main__cronometer {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+main.main .cronometer__container {
+  flex: 0.5;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 0 2rem #404040 inset, 0 0 1rem #606060;
+  padding: 2rem 1rem;
+  border-radius: 1rem;
+}
+main.main .cronometer__display {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 1rem;
+  font-size: 4rem;
+  color: #8efe6f;
+}
+main.main .cronometer__display .date {
+  font-size: 2rem;
+  color: #a0a0a0;
+}
+main.main .cronometer__controls {
+  display: flex;
+  justify-content: center;
+  gap: 5rem;
+  border: 1px solid #f45757;
+  border-radius: 3rem;
+  margin: 1rem auto;
+  border-top: 0.2rem dashed #707070;
+  border-bottom: 0.2rem dashed #707070;
+  padding: 2rem 5rem;
+}
+main.main .cronometer__controls i {
+  cursor: pointer;
+  font-size: 3rem;
+}
+main.main .fa-play {
+  color: #8efe6f;
+}
+main.main .fa-pause {
+  color: #f7a075;
+}
+main.main .fa-stop {
+  color: #f45757;
+}
+main.main .cronometer__history {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 0 10rem #404040 inset;
+  padding: 2rem 1rem;
+  border-radius: 1rem;
+  font-size: 2rem;
+  overflow-y: scroll;
+}
+main.main .history__item {
+  display: flex;
+  flex-direction: column;
+  background-color: #404040;
+  border-radius: 1rem;
+  box-shadow: 0 0 1rem #808080;
+}
+main.main .history__display {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  color: #ffea8a;
+}
+main.main .history__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: all 0.2s linear;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  height: 0;
+}
+main.main .history__list.active:not(:empty) {
+  opacity: 1;
+  visibility: visible;
+  height: auto;
+  padding: 0 1rem 1rem;
+}
+main.main .list__item {
+  text-align: center;
+  background-color: #303030;
+  padding: 1rem;
+  border-radius: 1rem;
+}
+main.main .list__item .start {
+  color: #8efe6f;
+}
+main.main .list__item .end {
+  color: #f45757;
+}
+main.main .list__item .duration {
+  color: #93facd;
+}
+
+/*# sourceMappingURL=styles.css.map */

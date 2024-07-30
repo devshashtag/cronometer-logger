@@ -1,5 +1,5 @@
-import { getDate, getTime, timeToSeconds, secondsToTime } from '/assets/js/modules/functions.js';
-import { storage } from '/assets/js/script.js';
+import { getDate, getTime, timeToSeconds, secondsToTime } from '/cronometer-plus/assets/js/modules/functions.js';
+import { storage } from '/cronometer-plus/assets/js/script.js';
 
 class Interface {
   constructor() {

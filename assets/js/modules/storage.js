@@ -1,4 +1,4 @@
-import { getDate, getTime, timeToSeconds, secondsToTime } from '/assets/js/modules/functions.js';
+import { getDate, getTime, timeToSeconds, secondsToTime } from '/cronometer-plus/assets/js/modules/functions.js';
 
 class Storage {
   constructor() {
