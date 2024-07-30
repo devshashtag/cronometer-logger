@@ -1,103 +1,102 @@
-import { getDate } from '/assets/js/modules/functions.js';
+import { getDate, getTime, timeToSeconds, secondsToTime } from '/assets/js/modules/functions.js';
 
 class Storage {
   constructor() {
+    // load config
     const config = {
-      groups: [],
-      items: {},
-      types: {
-        task: { id: 1, symbol: '-', type: 'task', selected: true },
-        done: { id: 2, symbol: '+', type: 'task', status: 'done' },
-        failed: { id: 3, symbol: 'x', type: 'task', status: 'failed' },
-        note: { id: 4, symbol: '!', type: 'note' },
-        goal: { id: 5, symbol: '#', type: 'goal' },
-        habit: { id: 6, symbol: '*', type: 'habit' },
-        routine: { id: 7, symbol: '=', type: 'routine' },
-      },
-      counters: {
-        groups: 1,
-        items: 1,
-        types: 7,
-      },
+      running: false,
+      startTime: 0,
+      date: getDate(),
+      history: {},
     };
 
-    const data = localStorage.getItem('config');
+    const data = localStorage.getItem('cronometer-plus');
     this.config = data ? JSON.parse(data) : config;
+
+    // set current day
+    const date = getDate();
+
+    if (this.config.date != date || !this.config.history[this.getDate()]) {
+      this.config.date = date;
+      this.config.history[date] ??= [];
+    }
   }
 
   saveConfig() {
-    localStorage.setItem('config', JSON.stringify(this.config));
+    localStorage.setItem('cronometer-plus', JSON.stringify(this.config));
   }
 
-  getGroupId() {
-    return this.config.counters.groups++;
+  // running
+  isRunning() {
+    return this.config.running;
   }
 
-  getItemId() {
-    return this.config.counters.items++;
-  }
-
-  getGroups() {
-    return this.config.groups;
-  }
-
-  getGroupItems() {
-    return this.config.items[this.getActiveGroupId()] || [];
-  }
-
-  getTypes() {
-    return Object.values(this.config.types);
-  }
-
-  setGroupItems(items) {
-    this.config.items[this.getActiveGroupId()] = items;
-  }
-
-  getActiveGroupId() {
-    for (const group of this.config.groups) {
-      if (group.active) return group.id;
-    }
-  }
-
-  setActiveGroup(id) {
-    for (const group of this.config.groups) {
-      if (group.active) delete group.active;
-      if (group.id === +id) group.active = true;
-    }
-
+  toggleRunning() {
+    this.config.running = !this.config.running;
     this.saveConfig();
   }
 
-  setSelectedType(id) {
-    for (const key in this.config.types) {
-      const type = this.config.types[key];
+  // get date
+  getDate() {
+    return this.config.date;
+  }
 
-      if (type.selected) delete this.config.types[key].selected;
-      if (type.id === +id) this.config.types[key].selected = true;
-    }
+  // history
+  getHistory() {
+    return this.config.history;
+  }
 
+  // add record
+  addRecord(start, end, date = this.getDate()) {
+    const duration = end - start;
+    const record = { start, end, duration };
+
+    this.getRecords().push(record);
     this.saveConfig();
   }
 
-  newGroup(group) {
-    if (group.active) {
-      // remove active group
-      for (const group of this.config.groups) {
-        if (group.active) delete group.active;
-      }
+  // records
+  getRecords(date = this.getDate()) {
+    return this.config.history[date];
+  }
+
+  // number of records
+  getNumberOfRecords(date) {
+    return this.getRecords(date).length;
+  }
+
+  // sum of durations
+  getDurations(date) {
+    let durations = 0;
+
+    for (const duration of this.getRecords(date).map((record) => record.duration)) {
+      durations += duration;
     }
 
-    // add new group
-    this.config.groups.push(group);
+    return durations;
+  }
+
+  // start time
+  setStartTime(time) {
+    this.config.startTime = timeToSeconds(time);
     this.saveConfig();
   }
 
-  newItem(item) {
-    let groupItems = this.getGroupItems();
-    groupItems.push(item);
+  getStartTime(seconds = true) {
+    if (!seconds) return secondsToTime(this.config.startTime);
 
-    this.setGroupItems(groupItems);
-    this.saveConfig();
+    return this.config.startTime;
+  }
+
+  // end time
+  getEndTime(seconds = true) {
+    if (!seconds) return getTime();
+
+    return timeToSeconds(getTime());
+  }
+
+  getCurrentTime() {
+    return secondsToTime(this.getEndTime() - this.getStartTime() + this.getDurations());
   }
 }
 
