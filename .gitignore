@@ -2,6 +2,8 @@
 .sass-cache/
 *.css.map
 
+### Less ###
+
 ### grunt ###
 # Grunt usually compiles files inside this directory
 dist/

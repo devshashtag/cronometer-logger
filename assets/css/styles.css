@@ -102,7 +102,12 @@ body {
 }
 
 .time::before {
-  content: attr(data-hour) ":" attr(data-minute) ":" attr(data-seconds);
+  content: attr(data-hour) ":" attr(data-minute) ":" attr(data-seconds) ":";
+}
+
+.time::after {
+  content: attr(data-milliseconds);
+  color: #909090;
 }
 
 .date::before {
@@ -111,17 +116,6 @@ body {
 
 .records::before {
   content: attr(data-records);
-}
-
-.history::before {
-  content: attr(data-year) "/" attr(data-month) "/" attr(data-day) " " attr(data-hour) ":" attr(data-minute) ":" attr(data-seconds) " " attr(data-records);
-  cursor: pointer;
-  padding: 1rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #ffea8a;
-  pointer-events: auto;
 }
 
 main.main {
@@ -179,7 +173,7 @@ main.main .fa-play {
   color: #8efe6f;
 }
 main.main .fa-pause {
-  color: #f7a075;
+  color: #ff9059;
 }
 main.main .fa-stop {
   color: #f45757;
@@ -202,15 +196,26 @@ main.main .history__item {
   border-radius: 1rem;
   box-shadow: 0 0 1rem #808080;
 }
-main.main .history__display {
+main.main .item__title {
   cursor: pointer;
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 1rem;
   padding: 1rem;
-  color: #ffea8a;
+  color: #e0e0e0;
+}
+main.main .item__title .date {
+  color: #8efe6f;
+}
+main.main .item__title .time {
+  color: #ff9059;
+}
+main.main .item__title .records {
+  color: #8efe6f;
 }
 main.main .history__list {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -226,19 +231,31 @@ main.main .history__list.active:not(:empty) {
   height: auto;
   padding: 0 1rem 1rem;
 }
-main.main .list__item {
+main.main .list__columns span {
+  display: inline-block;
+  min-width: 12rem;
   text-align: center;
+  text-transform: capitalize;
+}
+main.main .list__item,
+main.main .list__columns {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
   background-color: #303030;
   padding: 1rem;
-  border-radius: 1rem;
+  border-radius: 0.5rem;
 }
-main.main .list__item .start {
+main.main .list__item .start,
+main.main .list__columns .start {
   color: #8efe6f;
 }
-main.main .list__item .end {
+main.main .list__item .end,
+main.main .list__columns .end {
   color: #f45757;
 }
-main.main .list__item .duration {
+main.main .list__item .duration,
+main.main .list__columns .duration {
   color: #93facd;
 }
 
