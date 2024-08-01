@@ -12,11 +12,12 @@ class Storage {
       running: false,
       current: {},
       records: {},
+      version: "0.1",
     };
 
     // local config
     const localConfig = localStorage.getItem('cronometer-plus');
-    if (localConfig) {
+    if (localConfig && JSON.parse(localConfig).version == config.version) {
       config = JSON.parse(localConfig);
     }
 
