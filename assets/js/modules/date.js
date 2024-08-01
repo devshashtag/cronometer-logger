@@ -15,7 +15,7 @@ function persianToEnglishNumbers(text) {
   return text.replace(/[۰-۹]/g, (match) => persianToEnglishMap[match]);
 }
 
-function getDate(splited = false, timeZone = 'Asia/tehran') {
+function getDate(timeZone = 'Asia/tehran') {
   const options = {
     timeZone,
     year: 'numeric',
@@ -27,12 +27,14 @@ function getDate(splited = false, timeZone = 'Asia/tehran') {
 
   date = persianToEnglishNumbers(date);
 
-  if (splited) date = date.split('/').map((num) => +num);
-
   return date;
 }
 
-function getTime(splited = false, timeZone = 'Asia/tehran') {
+function getTimestamp() {
+  return +new Date();
+}
+
+function timestampToTime(timestamp, timeZone = 'Asia/tehran') {
   const options = {
     timeZone,
     hour12: false,
@@ -41,22 +43,20 @@ function getTime(splited = false, timeZone = 'Asia/tehran') {
     second: '2-digit',
   };
 
-  let time = new Date().toLocaleTimeString('fa-IR', options);
+  let time = new Date(timestamp);
 
+  time = time.toLocaleTimeString('fa-IR', options) + ':' + time.getMilliseconds().toString().padStart(3, '0');
   time = persianToEnglishNumbers(time);
-
-  if (splited) time = time.split(':').map((num) => +num);
 
   return time;
 }
 
-function timeToSeconds(time) {
-  const [hour, minute, seconds] = time.split(':').map((num) => +num);
-  return hour * 3600 + minute * 60 + seconds;
+function msToTime(milliseconds) {
+  const seconds = +milliseconds.toString().slice(0, -3);
+  milliseconds = milliseconds.toString().padStart(3, '0').slice(-3);
+  return (
+    [parseInt(seconds / 60 / 60), parseInt((seconds / 60) % 60), parseInt(seconds % 60)].join(':').replace(/\b(\d)\b/g, '0$1') + ':' + milliseconds
+  );
 }
 
-function secondsToTime(seconds) {
-  return [parseInt(seconds / 60 / 60), parseInt((seconds / 60) % 60), parseInt(seconds % 60)].join(':').replace(/\b(\d)\b/g, '0$1');
-}
-
-export { getDate, getTime, timeToSeconds, secondsToTime };
+export { getDate, getTimestamp, timestampToTime, msToTime };

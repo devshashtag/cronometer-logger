@@ -1,25 +1,26 @@
-import { getDate, getTime, timeToSeconds, secondsToTime } from '/assets/js/modules/functions.js';
+import { getDate, getTimestamp, msToTime } from '/assets/js/modules/date.js';
 
 class Storage {
   constructor() {
     // load config
-    const config = {
+    this.config = this.loadConfig();
+  }
+
+  loadConfig() {
+    // default config
+    let config = {
       running: false,
-      startTime: 0,
-      date: getDate(),
-      history: {},
+      current: {},
+      records: {},
     };
 
-    const data = localStorage.getItem('cronometer-plus');
-    this.config = data ? JSON.parse(data) : config;
-
-    // set current day
-    const date = getDate();
-
-    if (this.config.date != date || !this.config.history[this.getDate()]) {
-      this.config.date = date;
-      this.config.history[date] ??= [];
+    // local config
+    const localConfig = localStorage.getItem('cronometer-plus');
+    if (localConfig) {
+      config = JSON.parse(localConfig);
     }
+
+    return config;
   }
 
   saveConfig() {
@@ -31,72 +32,59 @@ class Storage {
     return this.config.running;
   }
 
-  toggleRunning() {
-    this.config.running = !this.config.running;
+  // set current record
+  setCurrentRecord(start, date = getDate()) {
+    const current = { start, date };
+
+    this.config.current = current;
+    this.config.running = true;
     this.saveConfig();
   }
 
-  // get date
-  getDate() {
-    return this.config.date;
-  }
-
-  // history
-  getHistory() {
-    return this.config.history;
-  }
-
-  // add record
-  addRecord(start, end, date = this.getDate()) {
+  // save current record
+  saveCurrentRecord(end) {
+    const { start, date } = this.config.current;
     const duration = end - start;
     const record = { start, end, duration };
 
-    this.getRecords().push(record);
+    this.config.current = {};
+    this.config.records[date] ??= [];
+    this.config.records[date].push(record);
+    this.config.running = false;
     this.saveConfig();
+
+    return record;
   }
 
   // records
-  getRecords(date = this.getDate()) {
-    return this.config.history[date];
+  getRecords() {
+    return this.config.records ?? {};
+  }
+
+  // records by date
+  getRecordsByDate(date = getDate()) {
+    return this.config.records[date] ?? [];
   }
 
   // number of records
-  getNumberOfRecords(date) {
-    return this.getRecords(date).length;
+  getNumberOfRecords(date = getDate()) {
+    return this.getRecordsByDate(date).length;
   }
 
   // sum of durations
-  getDurations(date) {
+  getDurations(date = getDate()) {
     let durations = 0;
 
-    for (const duration of this.getRecords(date).map((record) => record.duration)) {
+    for (const duration of this.getRecordsByDate(date).map((record) => record.duration)) {
       durations += duration;
     }
 
     return durations;
   }
 
-  // start time
-  setStartTime(time) {
-    this.config.startTime = timeToSeconds(time);
-    this.saveConfig();
-  }
-
-  getStartTime(seconds = true) {
-    if (!seconds) return secondsToTime(this.config.startTime);
-
-    return this.config.startTime;
-  }
-
-  // end time
-  getEndTime(seconds = true) {
-    if (!seconds) return getTime();
-
-    return timeToSeconds(getTime());
-  }
-
-  getCurrentTime() {
-    return secondsToTime(this.getEndTime() - this.getStartTime() + this.getDurations());
+  // get current Time
+  getCurrentTime(date = getDate()) {
+    return msToTime(getTimestamp() - this.config.current.start + this.getDurations(date));
   }
 }
 

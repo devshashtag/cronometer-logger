@@ -1,3 +1,8 @@
 .time::before {
-  content: attr(data-hour) ':' attr(data-minute) ':' attr(data-seconds);
+  content: attr(data-hour) ':' attr(data-minute) ':' attr(data-seconds) ':';
+}
+
+.time::after {
+  content: attr(data-milliseconds);
+  color: $theme-gray-8;
 }

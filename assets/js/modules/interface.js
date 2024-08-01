@@ -1,4 +1,4 @@
-import { getDate, getTime, timeToSeconds, secondsToTime } from '/assets/js/modules/functions.js';
+import { getDate, getTimestamp, timestampToTime, msToTime } from '/assets/js/modules/date.js';
 import { storage } from '/assets/js/script.js';
 
 class Interface {
@@ -9,32 +9,38 @@ class Interface {
     this.stopBtn = document.getElementById('stop');
     this.historyElm = document.querySelector('.cronometer__history');
 
-    // load ui
-    this.loadCronometer();
-
     // play event
     this.playBtn.addEventListener('click', this.play);
+
+    // load ui
+    this.loadCronometer();
   }
 
   loadCronometer() {
-    this.setDate(this.dateElm, storage.getDate());
-    this.setTime(this.cronometerElm, secondsToTime(storage.getDurations()));
+    this.setDate(this.dateElm, getDate());
+    this.setTime(this.cronometerElm, msToTime(storage.getDurations()));
 
-    for (const date in storage.getHistory()) {
+    for (const [date, records] of Object.entries(storage.getRecords())) {
       // event: history toggle item
       this.historyListElm = this.getHistoryList(date);
-      this.historyListElm.parentNode.parentNode.addEventListener('click', this.toggleHistoryItems);
 
-      for (const record of storage.getRecords(date)) {
-        const item = this.getHistoryListItem(record.start, record.end);
-        this.historyListElm.insertAdjacentHTML('afterbegin', item);
+      for (const record of records) {
+        const item = this.getHistoryListItem(record);
+        this.historyListElm.children[0].insertAdjacentHTML('afterend', item);
       }
 
       // set total durations and records
       this.setHistoryTitle(date);
     }
 
-    this.historyListElm = this.getHistoryList(storage.getDate());
+    this.historyListElm = this.getHistoryList(getDate());
+
+    this.historyListElm.parentNode.parentNode.addEventListener('click', (e) => {
+      const parent = e.target.closest('.history__item');
+      if (parent) {
+        parent.querySelector('.history__list').classList.toggle('active');
+      }
+    });
 
     // start cronometer if running
     if (storage.isRunning()) {
@@ -50,29 +56,24 @@ class Interface {
     }
   }
 
-  toggleHistoryItems = (e) => {
-    if (e.target.classList.contains('history__item')) {
-      e.target.querySelector('.history__list').classList.toggle('active');
-    }
-  };
-
   play = () => {
     if (!storage.isRunning()) {
-      storage.toggleRunning();
-
-      const time = getTime();
-      storage.setStartTime(time);
+      storage.setCurrentRecord(getTimestamp());
 
       this.interval = setInterval(() => {
         this.setTime(this.cronometerElm, storage.getCurrentTime());
       }, 100);
     } else {
       // stop cronometer
-      storage.toggleRunning();
       clearInterval(this.interval);
 
       // add record
-      this.addRecord();
+      const record = storage.saveCurrentRecord(getTimestamp());
+      const item = this.getHistoryListItem(record);
+      this.historyListElm.children[0].insertAdjacentHTML('afterend', item);
+
+      // set total durations and records
+      this.setHistoryTitle();
     }
 
     // toggle play/pause
@@ -83,34 +84,31 @@ class Interface {
     this.cronometerElm.classList.toggle('fa-pause');
   };
 
-  addRecord() {
-    // add record
-    const historyListItem = this.getHistoryListItem(storage.getStartTime(), storage.getEndTime(), true);
-    this.historyListElm.insertAdjacentHTML('afterbegin', historyListItem);
-
-    // set total durations and records
-    this.setHistoryTitle();
-  }
-
   setHistoryTitle(date) {
     // set total durations and records
-    const [dh, dm, ds] = secondsToTime(storage.getDurations(date)).split(':');
+    const [dh, dm, ds, dms] = msToTime(storage.getDurations(date)).split(':');
     const records = storage.getNumberOfRecords(date);
 
+    const title = this.historyListElm.parentNode.querySelector('.item__title');
+    const time = title.querySelector('.time');
+    const record = title.querySelector('.records');
+
     // total durations
-    this.historyListElm.parentNode.dataset.hour = dh;
-    this.historyListElm.parentNode.dataset.minute = dm;
-    this.historyListElm.parentNode.dataset.seconds = ds;
+    time.dataset.hour = dh;
+    time.dataset.minute = dm;
+    time.dataset.seconds = ds;
+    time.dataset.milliseconds = dms;
 
     // number of records
-    this.historyListElm.parentNode.dataset.records = records;
+    record.dataset.records = records;
   }
 
   setTime(elm, time) {
-    const [hour, minute, seconds] = time.split(':');
+    const [hour, minute, seconds, milliseconds] = time.split(':');
     elm.dataset.hour = hour;
     elm.dataset.minute = minute;
     elm.dataset.seconds = seconds;
+    elm.dataset.milliseconds = milliseconds;
   }
 
   setDate(elm, date) {
@@ -122,42 +120,52 @@ class Interface {
 
   getHistoryList(date) {
     const [year, month, day] = date.split('/');
-    let historyList = document.querySelector(`.history[data-year="${year}"][data-month="${month}"][data-day="${day}"] .history__list`);
+    let historyList = document.querySelector(`.item__title[data-date="${date}"] + .history__list`);
 
     if (!historyList) {
       this.historyElm.insertAdjacentHTML(
         'afterbegin',
         `<!-- item -->
-        <div class="history history__item"
-        data-year="${year}" data-month="${month}" data-day="${day}"
-        data-hour="00" data-minute="00" data-seconds="00"
-        data-records="0">
+        <div class="history__item">
+          <!-- display -->
+          <div class="item__title" data-date="${date}">
+            <span class="date" data-year="${year}" data-month="${month}" data-day="${day}"></span>
+            <span class="time" data-hour="00" data-minute="00" data-seconds="00" data-milliseconds="00"></span>
+            <span class="records" data-records="0"></span>
+          </div>
+
+
           <!-- list -->
-          <div class="history__list"></div>
+          <div class="history__list">
+            <!-- columns -->
+            <div class="list__columns">
+              <span>start</span>
+              <span>duration</span>
+              <span>end</span>
+            </div>
+
+          </div>
         </div>`
       );
 
-      historyList = document.querySelector(`.history[data-year="${year}"][data-month="${month}"][data-day="${day}"] .history__list`);
+      historyList = document.querySelector(`.item__title[data-date="${date}"] + .history__list`);
     }
 
     return historyList;
   }
 
-  getHistoryListItem(start, end, saveItem = false) {
-    const [sh, sm, ss] = secondsToTime(start).split(':');
-    const [eh, em, es] = secondsToTime(end).split(':');
-    const [dh, dm, ds] = secondsToTime(end - start).split(':');
+  getHistoryListItem(record) {
+    const [sh, sm, ss, sms] = timestampToTime(record.start).split(':');
+    const [eh, em, es, ems] = timestampToTime(record.end).split(':');
+    const [dh, dm, ds, dms] = msToTime(record.duration).split(':');
 
     const historyItem = `
     <!-- item -->
     <div class="list__item">
-      <span class="time start" data-hour="${sh}" data-minute="${sm}" data-seconds="${ss}"></span>
-      <span class="time end" data-hour="${eh}" data-minute="${em}" data-seconds="${es}"></span>
-      <span class="time duration" data-hour="${dh}" data-minute="${dm}" data-seconds="${ds}"></span>
+      <span class="time start" data-hour="${sh}" data-minute="${sm}" data-seconds="${ss}" data-milliseconds="${sms}"></span>
+      <span class="time duration" data-hour="${dh}" data-minute="${dm}" data-seconds="${ds}" data-milliseconds="${dms}"></span>
+      <span class="time end" data-hour="${eh}" data-minute="${em}" data-seconds="${es}" data-milliseconds="${ems}"></span>
     </div>`;
-
-    // add record
-    if (saveItem) storage.addRecord(start, end);
 
     return historyItem;
   }

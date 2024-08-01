@@ -96,23 +96,39 @@ main.main {
     box-shadow: 0 0 1rem $theme-gray-7;
   }
 
-  // display
-  .history__display {
+  // title
+  .item__title {
     cursor: pointer;
+
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 1rem;
     padding: 1rem;
 
-    color: $theme-yellow;
+    color: $theme-white;
+
+    .date {
+      color: $theme-green;
+    }
+
+    .time {
+      color: $theme-orange;
+    }
+
+    .records {
+      color: $theme-green;
+    }
   }
 
   // list
   .history__list {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     transition: all $transition-duration linear;
+
     // hidden
     overflow: hidden;
     opacity: 0;
@@ -127,12 +143,22 @@ main.main {
     padding: 0 1rem 1rem;
   }
 
-  // item
-  .list__item {
+  .list__columns span {
+    display: inline-block;
+    min-width: 12rem;
     text-align: center;
+    text-transform: capitalize;
+  }
+
+  // items, columns
+  .list__item,
+  .list__columns {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
     background-color: $theme-gray-2;
     padding: 1rem;
-    border-radius: 1rem;
+    border-radius: 0.5rem;
 
     .start {
       color: $theme-green;
