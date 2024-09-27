@@ -1,5 +1,5 @@
 {
-  "name": "cronometer-plus",
+  "name": "cronometer-logger",
   "version": "1.0.0",
   "description": "cronometer+ is a simple cronometer with history",
   "main": "index.js",
@@ -8,13 +8,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DevsHashtag/cronometer-plus.git"
+    "url": "git+https://github.com/DevsHashtag/cronometer-logger.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/DevsHashtag/cronometer-plus/issues"
+    "url": "https://github.com/DevsHashtag/cronometer-logger/issues"
   },
-  "homepage": "https://github.com/DevsHashtag/cronometer-plus#readme"
+  "homepage": "https://github.com/DevsHashtag/cronometer-logger#readme"
 }
