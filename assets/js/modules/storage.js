@@ -12,11 +12,12 @@ class Storage {
       running: false,
       current: {},
       records: {},
+      version: '0.1',
     };
 
     // local config
-    const localConfig = localStorage.getItem('cronometer-logger');
-    if (localConfig && !JSON.parse(localConfig).history) {
+    const localConfig = localStorage.getItem('config');
+    if (localConfig && JSON.parse(localConfig).version == config.version) {
       config = JSON.parse(localConfig);
     }
 
@@ -24,7 +25,7 @@ class Storage {
   }
 
   saveConfig() {
-    localStorage.setItem('cronometer-logger', JSON.stringify(this.config));
+    localStorage.setItem('config', JSON.stringify(this.config));
   }
 
   // running
