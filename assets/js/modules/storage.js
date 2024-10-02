@@ -1,4 +1,4 @@
-import { getDate, getTimestamp, msToTime } from '/cronometer-plus/assets/js/modules/date.js';
+import { getDate, getTimestamp, msToTime } from '/cronometer-logger/assets/js/modules/date.js';
 
 class Storage {
   constructor() {
@@ -15,7 +15,7 @@ class Storage {
     };
 
     // local config
-    const localConfig = localStorage.getItem('cronometer-plus');
+    const localConfig = localStorage.getItem('cronometer-logger');
     if (localConfig && !JSON.parse(localConfig).history) {
       config = JSON.parse(localConfig);
     }
@@ -24,7 +24,7 @@ class Storage {
   }
 
   saveConfig() {
-    localStorage.setItem('cronometer-plus', JSON.stringify(this.config));
+    localStorage.setItem('cronometer-logger', JSON.stringify(this.config));
   }
 
   // running

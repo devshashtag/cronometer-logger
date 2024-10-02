@@ -1,5 +1,5 @@
-import { getDate, getTimestamp, timestampToTime, msToTime } from '/cronometer-plus/assets/js/modules/date.js';
-import { storage } from '/cronometer-plus/assets/js/script.js';
+import { getDate, getTimestamp, timestampToTime, msToTime } from '/cronometer-logger/assets/js/modules/date.js';
+import { storage } from '/cronometer-logger/assets/js/script.js';
 
 class Interface {
   constructor() {
