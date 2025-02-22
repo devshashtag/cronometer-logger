@@ -1,31 +1,31 @@
 import { getDate, getTimestamp, msToTime } from '/assets/js/modules/date.js';
 
 class Storage {
-  constructor() {
-    // load config
-    this.config = this.loadConfig();
+  constructor(configName = 'config') {
+    this.configName = configName;
+    this.loadConfig();
   }
 
   loadConfig() {
-    // default config
-    let config = {
+    this.config = {
       running: false,
       current: {},
       records: {},
       version: '0.1',
     };
 
-    // local config
-    const localConfig = localStorage.getItem('config');
-    if (localConfig && JSON.parse(localConfig).version == config.version) {
-      config = JSON.parse(localConfig);
+    // load config if exist
+    const config = localStorage.getItem(this.configName);
+
+    if (config && JSON.parse(config).version == this.config.version) {
+      this.config = JSON.parse(config);
     }
 
-    return config;
+    this.saveConfig();
   }
 
   saveConfig() {
-    localStorage.setItem('config', JSON.stringify(this.config));
+    localStorage.setItem('cronometer-logger', JSON.stringify(this.config));
   }
 
   // running
