@@ -1,20 +1,20 @@
 {
-  "name": "cronometer-logger",
+  "name": "cronometer",
   "version": "1.0.0",
   "description": "cronometer+ is a simple cronometer with history",
   "main": "index.js",
   "scripts": {
-    "sass": "sass --watch assets/scss/styles.scss assets/css/styles.css"
+    "sass": "sass --watch assets/scss/main.scss assets/css/styles.css"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DevsHashtag/cronometer-logger.git"
+    "url": "git+https://github.com/DevsHashtag/cronometer.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/DevsHashtag/cronometer-logger/issues"
+    "url": "https://github.com/DevsHashtag/cronometer/issues"
   },
-  "homepage": "https://github.com/DevsHashtag/cronometer-logger#readme"
+  "homepage": "https://github.com/DevsHashtag/cronometer#readme"
 }

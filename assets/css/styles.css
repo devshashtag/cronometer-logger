@@ -1,11 +1,12 @@
 *,
 ::after,
 ::before {
-  margin: 0;
-  padding: 0;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
-  border: none;
   outline: none;
+  border: none;
+  padding: 0;
+  margin: 0;
 }
 
 li {
@@ -16,10 +17,25 @@ a {
   text-decoration: none;
 }
 
+input {
+  color: inherit;
+  background-color: inherit;
+}
+
+svg,
 img,
 video {
   width: 100%;
   height: 100%;
+}
+
+svg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  width: 4rem;
+  aspect-ratio: 1;
 }
 
 button {
@@ -34,14 +50,19 @@ button {
   line-height: normal;
   -webkit-font-smoothing: inherit;
   -moz-osx-font-smoothing: inherit;
+  -webkit-appearance: none;
   appearance: none;
+}
+
+li {
+  list-style-type: none;
 }
 
 ::-webkit-scrollbar {
   cursor: default;
-  background-color: transparent;
+  background-color: #606060;
   height: 0.8rem;
-  width: 0.8rem;
+  width: 0.5rem;
 }
 
 ::-webkit-scrollbar-corner {
@@ -50,30 +71,12 @@ button {
 
 ::-webkit-scrollbar-thumb {
   cursor: pointer;
-  border-radius: 1rem;
-  background-color: #808080;
+  background-color: #8f8f8f;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background-color: #808080;
-}
-
+::-webkit-scrollbar-thumb:hover,
 ::-webkit-scrollbar-thumb:active {
-  background-color: #808080;
-}
-
-.no-select, button {
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-.no-select:focus, button:focus {
-  outline: none !important;
+  background-color: #9c9c9c;
 }
 
 html {
@@ -101,162 +104,168 @@ body {
   flex-direction: column;
 }
 
-.time::before {
-  content: attr(data-hour) ":" attr(data-minute) ":" attr(data-seconds) ":";
-}
-
-.time::after {
-  content: attr(data-milliseconds);
-  color: #909090;
-}
-
-.date::before {
-  content: attr(data-year) " / " attr(data-month) " / " attr(data-day);
-}
-
-.records::before {
-  content: attr(data-records);
-}
-
 main.main {
-  max-width: 1980px;
+  max-width: 1920px;
   margin: 0 auto;
   width: 100%;
   height: 100%;
-  padding: 2rem;
+}
+main.main [class$=__date]::before {
+  content: attr(data-year) " / " attr(data-month) " / " attr(data-day);
+}
+main.main [class*="__time "]::before,
+main.main [class$=__time]::before {
+  content: attr(data-hour) ":" attr(data-minute) ":" attr(data-seconds);
 }
 main.main section.main__cronometer {
-  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-}
-main.main .cronometer__container {
-  flex: 0.5;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  box-shadow: 0 0 2rem #404040 inset, 0 0 1rem #606060;
-  padding: 2rem 1rem;
-  border-radius: 1rem;
-}
-main.main .cronometer__display {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  padding: 2rem 1rem;
-  font-size: 4rem;
-  color: #8efe6f;
-}
-main.main .cronometer__display .date {
-  font-size: 2rem;
-  color: #a0a0a0;
-}
-main.main .cronometer__controls {
-  display: flex;
-  justify-content: center;
-  gap: 5rem;
-  border: 1px solid #f45757;
-  border-radius: 3rem;
-  margin: 1rem auto;
-  border-top: 0.2rem dashed #707070;
-  border-bottom: 0.2rem dashed #707070;
-  padding: 2rem 5rem;
-}
-main.main .cronometer__controls i {
-  cursor: pointer;
-  font-size: 3rem;
-}
-main.main .fa-play {
-  color: #8efe6f;
-}
-main.main .fa-pause {
-  color: #ff9059;
-}
-main.main .fa-stop {
-  color: #f45757;
-}
-main.main .cronometer__history {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  box-shadow: 0 0 10rem #404040 inset;
-  padding: 2rem 1rem;
-  border-radius: 1rem;
-  font-size: 2rem;
-  overflow-y: scroll;
-}
-main.main .history__item {
-  display: flex;
-  flex-direction: column;
-  background-color: #404040;
-  border-radius: 1rem;
-  box-shadow: 0 0 1rem #808080;
-}
-main.main .item__title {
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   gap: 1rem;
   padding: 1rem;
-  color: #e0e0e0;
+  background-color: #404040;
+  border-radius: 0.5rem;
+  overflow: auto;
 }
-main.main .item__title .date {
+main.main .cronometer__status {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 2rem 1rem;
+  text-transform: capitalize;
+  color: #ffe881;
+}
+main.main .cronometer__status .status__datetime,
+main.main .cronometer__status .status__durations {
+  display: flex;
+  gap: 1rem;
+}
+main.main .cronometer__status .status__datetime span,
+main.main .cronometer__status .status__durations span {
+  font-weight: bold;
+}
+main.main .cronometer__status .status__datetime {
+  font-size: 2.5rem;
+  color: #a0a0a0;
+}
+main.main .cronometer__status .total__time {
   color: #8efe6f;
 }
-main.main .item__title .time {
+main.main .cronometer__status .today__time {
   color: #ff9059;
 }
-main.main .item__title .records {
-  color: #8efe6f;
+main.main .cronometer__status .current__time {
+  color: #b1dbff;
 }
-main.main .history__list {
+main.main .cronometer__history {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #2a2a2a;
+}
+main.main .cronometer__history .history__record:nth-child(1) .record__button {
+  cursor: pointer;
+}
+main.main .cronometer__history .history__record:nth-child(1) .record__button.play {
+  fill: #8efe6f;
+}
+main.main .cronometer__history .history__record:nth-child(1) .record__button.stop {
+  fill: #f45757;
+}
+main.main .history__record {
+  color: #ffe881;
+}
+main.main .history__record .record__header {
+  display: flex;
+  align-items: center;
+  background-color: #505050;
+}
+main.main .history__record .record__button {
+  fill: #808080;
+}
+main.main .history__record .record__button use {
+  display: none;
+}
+main.main .history__record .record__button.play use:nth-of-type(1) {
+  display: block;
+}
+main.main .history__record .record__button.stop use:nth-of-type(2) {
+  display: block;
+}
+main.main .history__record .record__indicator {
   position: relative;
+  flex: 1;
+  width: 100%;
+  height: 4rem;
+  display: flex;
+  background-color: #303030;
+}
+main.main .history__record .record__indicator .record__item {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background-color: #8fcbae;
+}
+main.main .history__record .record__date {
+  text-align: center;
+  font-size: 1.6rem;
+  padding: 1rem;
+}
+main.main .history__record .record__history {
+  cursor: pointer;
+  fill: #a0a0a0;
+}
+main.main .history__record .record__items {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  transition: all 0.2s linear;
-  overflow: hidden;
+  overflow-y: auto;
+  max-height: 23.5rem;
+  height: 0;
+  scroll-snap-type: y mandatory;
+  scrollbar-gutter: stable;
   opacity: 0;
   visibility: hidden;
-  height: 0;
+  transition-property: opacity, visiblity;
+  transition-duration: 0.2s;
+  transition-timing-function: linear;
 }
-main.main .history__list.active:not(:empty) {
+main.main .history__record .record__items.show {
+  height: auto;
   opacity: 1;
   visibility: visible;
-  height: auto;
-  padding: 0 1rem 1rem;
+  padding: 1rem 0.5rem 1rem 1rem;
+  border: 1px solid #303030;
 }
-main.main .list__columns span {
-  display: inline-block;
-  min-width: 12rem;
-  text-align: center;
-  text-transform: capitalize;
-}
-main.main .list__item,
-main.main .list__columns {
+main.main .history__record .record__items .record__item {
+  scroll-snap-align: center;
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
-  background-color: #303030;
+  align-items: center;
   padding: 1rem;
-  border-radius: 0.5rem;
+  gap: 1rem;
+  text-align: center;
+  background-color: #505050;
 }
-main.main .list__item .start,
-main.main .list__columns .start {
+main.main .history__record .record__items .record__item .record__options {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+main.main .history__record .record__items .record__item .record__options .option__remove {
+  cursor: pointer;
+  fill: #f45757;
+  width: 2rem;
+  padding: 0rem;
+}
+main.main .history__record .record__items .record__item .start {
   color: #8efe6f;
 }
-main.main .list__item .end,
-main.main .list__columns .end {
+main.main .history__record .record__items .record__item .end {
   color: #f45757;
-}
-main.main .list__item .duration,
-main.main .list__columns .duration {
-  color: #93facd;
 }
 
 /*# sourceMappingURL=styles.css.map */

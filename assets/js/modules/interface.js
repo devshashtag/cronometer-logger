@@ -1,116 +1,18 @@
-import { getDate, getTimestamp, timestampToTime, msToTime } from '/cronometer-logger/assets/js/modules/date.js';
+import { getTimestamp, timestampToTime, msToTime, getTime } from '/cronometer-logger/assets/js/modules/date.js';
 import { storage } from '/cronometer-logger/assets/js/script.js';
 
 class Interface {
   constructor() {
-    this.cronometerElm = document.getElementById('cronometer');
-    this.dateElm = document.getElementById('date');
-    this.playBtn = document.getElementById('play');
-    this.stopBtn = document.getElementById('stop');
-    this.historyElm = document.querySelector('.cronometer__history');
+    this.date = document.getElementById('date');
+    this.time = document.getElementById('time');
+    this.total = document.getElementById('total');
+    this.today = document.getElementById('today');
+    this.current = document.getElementById('current');
 
-    // play event
-    this.playBtn.addEventListener('click', this.play);
-
-    // load ui
-    this.loadCronometer();
+    this.history = document.getElementById('history');
   }
 
-  loadCronometer() {
-    this.setDate(this.dateElm, getDate());
-    this.setTime(this.cronometerElm, msToTime(storage.getDurations()));
-
-    for (const [date, records] of Object.entries(storage.getRecords())) {
-      // event: history toggle item
-      this.historyListElm = this.getHistoryList(date);
-
-      for (const record of records) {
-        const item = this.getHistoryListItem(record);
-        this.historyListElm.children[0].insertAdjacentHTML('afterend', item);
-      }
-
-      // set total durations and records
-      this.setHistoryTitle(date);
-    }
-
-    this.historyListElm = this.getHistoryList(getDate());
-
-    this.historyListElm.parentNode.parentNode.addEventListener('click', (e) => {
-      const parent = e.target.closest('.history__item');
-      if (parent) {
-        parent.querySelector('.history__list').classList.toggle('active');
-      }
-    });
-
-    // start cronometer if running
-    if (storage.isRunning()) {
-      this.interval = setInterval(() => {
-        this.setTime(this.cronometerElm, storage.getCurrentTime());
-      }, 100);
-
-      // toggle to running
-      this.playBtn.classList.add('fa-pause');
-      this.cronometerElm.classList.add('fa-play');
-      this.playBtn.classList.remove('fa-play');
-      this.cronometerElm.classList.remove('fa-pause');
-    }
-  }
-
-  play = () => {
-    if (!storage.isRunning()) {
-      storage.setCurrentRecord(getTimestamp());
-
-      this.interval = setInterval(() => {
-        this.setTime(this.cronometerElm, storage.getCurrentTime());
-      }, 100);
-    } else {
-      // stop cronometer
-      clearInterval(this.interval);
-
-      // add record
-      const record = storage.saveCurrentRecord(getTimestamp());
-      const item = this.getHistoryListItem(record);
-      this.historyListElm.children[0].insertAdjacentHTML('afterend', item);
-
-      // set total durations and records
-      this.setHistoryTitle();
-    }
-
-    // toggle play/pause
-    this.playBtn.classList.toggle('fa-play');
-    this.playBtn.classList.toggle('fa-pause');
-    // toggle color of cronometer
-    this.cronometerElm.classList.toggle('fa-play');
-    this.cronometerElm.classList.toggle('fa-pause');
-  };
-
-  setHistoryTitle(date) {
-    // set total durations and records
-    const [dh, dm, ds, dms] = msToTime(storage.getDurations(date)).split(':');
-    const records = storage.getNumberOfRecords(date);
-
-    const title = this.historyListElm.parentNode.querySelector('.item__title');
-    const time = title.querySelector('.time');
-    const record = title.querySelector('.records');
-
-    // total durations
-    time.dataset.hour = dh;
-    time.dataset.minute = dm;
-    time.dataset.seconds = ds;
-    time.dataset.milliseconds = dms;
-
-    // number of records
-    record.dataset.records = records;
-  }
-
-  setTime(elm, time) {
-    const [hour, minute, seconds, milliseconds] = time.split(':');
-    elm.dataset.hour = hour;
-    elm.dataset.minute = minute;
-    elm.dataset.seconds = seconds;
-    elm.dataset.milliseconds = milliseconds;
-  }
-
+  // set date and time
   setDate(elm, date) {
     const [year, month, day] = date.split('/');
     elm.dataset.year = year;
@@ -118,331 +20,208 @@ class Interface {
     elm.dataset.day = day;
   }
 
-  getHistoryList(date) {
-    const [year, month, day] = date.split('/');
-    let historyList = document.querySelector(`.item__title[data-date="${date}"] + .history__list`);
+  setTime(elm, time) {
+    const [hour, minute, seconds] = time.split(':');
+    elm.dataset.hour = hour;
+    elm.dataset.minute = minute;
+    elm.dataset.seconds = seconds;
+  }
 
-    if (!historyList) {
-      this.historyElm.insertAdjacentHTML(
-        'afterbegin',
-        `<!-- item -->
-        <div class="history__item">
-          <!-- display -->
-          <div class="item__title" data-date="${date}">
-            <span class="date" data-year="${year}" data-month="${month}" data-day="${day}"></span>
-            <span class="time" data-hour="00" data-minute="00" data-seconds="00" data-milliseconds="00"></span>
-            <span class="records" data-records="0"></span>
-          </div>
+  // update date and time
+  updateDateTime(interval = 500) {
+    // initialize update
+    this.setDate(this.date, storage.currentDate);
+    this.setTime(this.time, getTime());
 
+    // interval update
+    setInterval(() => {
+      this.setDate(this.date, storage.currentDate);
+      this.setTime(this.time, getTime());
+    }, interval);
+  }
 
-          <!-- list -->
-          <div class="history__list">
-            <!-- columns -->
-            <div class="list__columns">
-              <span>start</span>
-              <span>duration</span>
-              <span>end</span>
-            </div>
+  updateDurations() {
+    this.setTime(this.current, storage.getCurrentDuration());
+    this.setTime(this.today, storage.getTodayDuration());
+    this.setTime(this.total, storage.getTotalDuration());
+  }
 
-          </div>
-        </div>`
-      );
+  generateHistoryRecords() {
+    let historyRecords = '';
 
-      historyList = document.querySelector(`.item__title[data-date="${date}"] + .history__list`);
+    const storageRecords = storage.getRecords();
+    const sortedRecords = Object.entries(storageRecords).sort(([currentDate], [nextDate]) => {
+      const currentNum = parseInt(currentDate.replace(/\//g, ''));
+      const nextNum = parseInt(nextDate.replace(/\//g, ''));
+      return nextNum - currentNum;
+    });
+
+    for (const [date, records] of sortedRecords) {
+      const recordItems = records
+        .sort((currentRecord, nextRecord) => nextRecord.start - currentRecord.start)
+        .map(({ duration, start, end }) => {
+          return this.getRecordItem(duration, start, end);
+        })
+        .join('\n');
+
+      const historyRecord = this.getHistoryRecord(date, recordItems);
+      historyRecords += historyRecord;
     }
 
-    return historyList;
+    // add today history record if not exist
+    if (!storageRecords[storage.currentDate]) {
+      historyRecords = this.getHistoryRecord(storage.currentDate) + historyRecords;
+    }
+
+    this.history.insertAdjacentHTML('afterbegin', historyRecords);
+    this.record = this.history.querySelector('.history__record:nth-child(1)');
+    this.recordItems = this.record.querySelector('.record__items');
+    this.recordBtn = this.record.querySelector('.record__button');
   }
 
-  getHistoryListItem(record) {
-    const [sh, sm, ss, sms] = timestampToTime(record.start).split(':');
-    const [eh, em, es, ems] = timestampToTime(record.end).split(':');
-    const [dh, dm, ds, dms] = msToTime(record.duration).split(':');
+  setHistoryEvents() {
+    // record button
+    this.recordBtn.addEventListener('click', () => {
+      this.play();
+    });
 
-    const historyItem = `
-    <!-- item -->
-    <div class="list__item">
-      <span class="time start" data-hour="${sh}" data-minute="${sm}" data-seconds="${ss}" data-milliseconds="${sms}"></span>
-      <span class="time duration" data-hour="${dh}" data-minute="${dm}" data-seconds="${ds}" data-milliseconds="${dms}"></span>
-      <span class="time end" data-hour="${eh}" data-minute="${em}" data-seconds="${es}" data-milliseconds="${ems}"></span>
-    </div>`;
+    // toggle history-records button
+    this.history.addEventListener('click', (e) => {
+      const target = e.target;
+      const recordHistory = target.closest('.record__history');
+      const removeButton = target.closest('.option__remove');
 
-    return historyItem;
+      if (recordHistory) {
+        const historyRecord = recordHistory.closest('.history__record');
+        const recordItems = historyRecord.querySelector('.record__items');
+
+        recordItems.classList.toggle('show');
+      } else if (removeButton) {
+        const historyRecord = removeButton.closest('.history__record');
+        const recordItem = removeButton.closest('.record__item');
+        const recordItems = removeButton.closest('.record__items');
+        // dataset
+        const dateData = historyRecord.querySelector('.record__date').dataset;
+        const durationData = recordItem.querySelector('.duration').dataset;
+        const startData = recordItem.querySelector('.start').dataset;
+        const endData = recordItem.querySelector('.end').dataset;
+
+        // record values
+        const date = Object.values(dateData).join('/');
+        const duration = Object.values(durationData).join(':');
+        const start = Object.values(startData).join(':');
+        const end = Object.values(endData).join(':');
+        const isRemoved = storage.removeRecord(date, { duration, start, end });
+        if (isRemoved) recordItems.removeChild(recordItem);
+        this.updateDurations();
+      }
+    });
   }
 
-  // // group list
-  // updateGroupsList() {
-  //   this.groupsList.replaceChildren(...this.getGroupElements());
-  // }
+  updateOnRunning() {
+    if (storage.isRunning()) {
+      this.interval = setInterval(() => {
+        this.updateDurations();
+      }, 100);
 
-  // // items list
-  // updateItemsList() {
-  //   this.itemsList.replaceChildren(...this.getItemElements());
-  //   this.itemText.innerText = '';
-  //   this.itemText.focus();
-  // }
+      // toggle to stop
+      this.recordBtn.classList.toggle('play');
+      this.recordBtn.classList.toggle('stop');
+    }
+  }
 
-  // // types list
-  // updateTypesList() {
-  //   this.itemTypeList.replaceChildren(...this.getTypeElements());
-  // }
+  removeRecord() {}
 
-  // // group input
-  // hideGroupName() {
-  //   // change btn to close
-  //   this.groupBtn.classList.remove('button-active');
+  // initialize ui
+  init() {
+    this.generateHistoryRecords();
+    this.setHistoryEvents();
+    this.updateDateTime();
+    this.updateDurations();
+    this.updateOnRunning();
+  }
 
-  //   // hide group name
-  //   this.groupName.classList.remove('input-show');
-  //   this.groupName.innerText = '';
-  //   this.itemText.focus();
-  // }
+  play() {
+    if (!storage.isRunning()) {
+      storage.setCurrentRecord(getTimestamp());
 
-  // showGroupName() {
-  //   // change btn to open
-  //   this.groupBtn.classList.add('button-active');
+      this.interval = setInterval(() => {
+        this.updateDurations();
+      }, 100);
+    } else {
+      // stop cronometer
+      clearInterval(this.interval);
 
-  //   // show group name
-  //   this.groupName.classList.add('input-show');
-  //   setTimeout(() => this.groupName.focus(), 50);
-  // }
+      // add record
+      const { duration, start, end } = storage.saveCurrentRecord(getTimestamp());
+      const item = this.getRecordItem(duration, start, end);
+      this.recordItems.insertAdjacentHTML('afterbegin', item);
+    }
 
-  // // active group
-  // changeActiveGroup = (e) => {
-  //   const target = e.target;
+    // toggle play/stop
+    this.recordBtn.classList.toggle('play');
+    this.recordBtn.classList.toggle('stop');
+  }
 
-  //   if (target.classList.contains('list__group')) {
-  //     // remove old active-group
-  //     document.getElementById('group-active')?.removeAttribute('id');
+  getHistoryRecord(date, recordItems = '') {
+    const [year, month, day] = date.split('/');
 
-  //     // active clicked group
-  //     target.id = 'group-active';
+    const historyRecord = `
+      <!-- record -->
+      <li class="history__record">
+        <!-- header -->
+        <div class="record__header">
+          <!-- record button -->
+          <svg class="record__button play">
+            <title>start recording</title>
+            <use href="/cronometer-logger/assets/icons/play.svg#play"></use>
+            <use href="/cronometer-logger/assets/icons/stop.svg#stop"></use>
+          </svg>
+          <!-- indicator -->
+          <ul class="record__indicator">
+          </ul>
+          <!-- date -->
+          <div class="record__date" data-year="${year}" data-month="${month}" data-day="${day}"></div>
+          <!-- show history -->
+          <svg class="record__history">
+            <title>show history</title>
+            <use href="assets/icons/history.svg#history"></use>
+          </svg>
+        </div>
+        <!-- items -->
+        <ul class="record__items">
+          ${recordItems}
+        </ul>
+      </li>
+    `;
 
-  //     // save active group
-  //     storage.setActiveGroup(target.dataset.id);
+    return historyRecord;
+  }
 
-  //     // reload items from new active group
-  //     this.updateGroupsList();
-  //     this.updateItemsList();
-  //   }
-  // };
+  getRecordItem(duration, start, end) {
+    const [durationHour, durationMinute, durationSeconds] = msToTime(duration).split(':');
+    const [startHour, startMinute, startSeconds] = timestampToTime(start).split(':');
+    const [endHour, endMinute, endSeconds] = timestampToTime(end).split(':');
 
-  // // item type
-  // toggleTypeList = () => {
-  //   this.itemTypeList.classList.toggle('list__show');
-  // };
+    const recordItem = `
+      <!-- record -->
+      <li class="record__item">
+        <span class="record__time duration" title="duration" data-hour="${durationHour}" data-minute="${durationMinute}" data-seconds="${durationSeconds}"></span>
+        <span class="record__time start" title="start" data-hour="${startHour}" data-minute="${startMinute}" data-seconds="${startSeconds}"></span>
+        <span class="record__time end" title="end" data-hour="${endHour}" data-minute="${endMinute}" data-seconds="${endSeconds}"></span>
 
-  // changeItemType = (e) => {
-  //   const target = e.target.tagName.toLowerCase() === 'li' ? e.target : e.target.parentNode;
+        <span class="record__options">
+          <!-- remove -->
+          <svg class="option__remove">
+            <title>remove record</title>
+            <use href="assets/icons/remove.svg#remove"></use>
+          </svg>
+        </span>
+      </li>
+    `;
 
-  //   if (target.classList.contains('list__item')) {
-  //     const classList = Array.from(target.classList);
-  //     // remove list__item
-  //     classList.shift();
-
-  //     // change theme to item type
-  //     this.itemType.className = '';
-  //     this.itemType.classList.add(...classList);
-  //     this.itemType.innerText = target.innerText.trim();
-
-  //     this.itemText.className = 'input-default';
-  //     this.itemText.classList.add(...classList);
-
-  //     this.itemBtn.className = 'button-default';
-  //     this.itemBtn.classList.add(...classList);
-
-  //     // hide list for a short time
-  //     this.itemTypeList.classList.remove('list__show');
-
-  //     // set selected type
-  //     storage.setSelectedType(target.dataset.id);
-
-  //     // update types list
-  //     this.updateTypesList();
-
-  //     // focus on item text
-  //     this.itemText.focus();
-  //   }
-  // };
-
-  // // new group
-  // newGroup = (event) => {
-  //   let target = event.target;
-  //   if (target.tagName.toLowerCase() === 'span') target = target.parentNode;
-
-  //   // runs when close btn clicked
-  //   if (target.classList.contains('button-active')) {
-  //     this.hideGroupName();
-  //     return;
-  //   }
-
-  //   // get userinput
-  //   this.showGroupName();
-
-  //   this.groupName.addEventListener('keydown', (e) => {
-  //     const name = this.groupName.innerText.trim();
-
-  //     // if pressed key is 'Enter' and groupName is not empty
-  //     if (e.key === 'Enter' && name !== '') {
-  //       // prevent key
-  //       e.preventDefault();
-
-  //       // hide input
-  //       this.hideGroupName();
-
-  //       // add new group
-  //       const group = {
-  //         id: storage.getGroupId(),
-  //         name: name,
-  //         active: true,
-  //       };
-
-  //       storage.newGroup(group);
-
-  //       // reload groups and it's items after adding new group
-  //       this.updateGroupsList();
-  //       this.updateItemsList();
-  //     } else if (e.key === 'Enter') e.preventDefault();
-  //   });
-  // };
-
-  // // new item
-  // newItem = () => {
-  //   const date = getDate();
-  //   const groupId = storage.getActiveGroupId();
-  //   const text = this.itemText.innerText.trim();
-  //   const type = this.itemType.className.match(/type__(\w+)/)[1];
-  //   let status = this.itemType.className.match(/status--(\w+)/);
-  //   status = status ? status[1] : '';
-
-  //   // focus text input
-  //   this.itemText.focus();
-
-  //   // if input or group-id is empty dont add new item
-  //   if (!text || !groupId) return;
-
-  //   // new item
-  //   const item = {
-  //     id: storage.getItemId(),
-  //     type: type,
-  //     text: text,
-  //     status: status,
-  //     created: date,
-  //   };
-
-  //   // save item
-  //   storage.newItem(item);
-
-  //   // add item to items list
-  //   const element = this.getItemElement(item);
-  //   this.itemsList.appendChild(element);
-
-  //   // scroll to new item
-  //   element.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' });
-
-  //   // clear text input
-  //   this.itemText.innerText = '';
-  // };
-
-  // // templates
-  // getGroupElement(group) {
-  //   const element = document.createElement('li');
-  //   element.classList.add('list__group');
-  //   element.dataset.id = group.id;
-  //   element.innerText = group.name;
-  //   if (group.active) element.id = 'group-active';
-
-  //   return element;
-  // }
-
-  // getItemElement(item) {
-  //   const element = document.createElement('li');
-  //   const symbol = document.createElement('span');
-  //   const text = document.createElement('span');
-  //   const time = document.createElement('span');
-  //   const date = document.createElement('span');
-
-  //   // classes
-  //   // item
-  //   element.classList.add('list__item');
-  //   element.classList.add(`type__${item.type}`);
-  //   if (item.status) element.classList.add(`status--${item.status}`);
-
-  //   // infos
-  //   symbol.classList.add('item__symbol');
-  //   text.classList.add('item__text');
-  //   time.classList.add('item__time');
-  //   date.classList.add('item__date');
-
-  //   // add to dom
-  //   element.append(symbol, text, time, date);
-
-  //   // item infos
-  //   element.dataset.id = item.id;
-  //   symbol.innerText = storage.config.types[item.status || item.type]?.symbol ?? '?';
-  //   symbol.title = (item.type + ' ' + item.status).trim();
-  //   text.innerText = item.text;
-  //   time.innerText = item.created.time;
-  //   date.innerText = item.created.date;
-
-  //   return element;
-  // }
-
-  // getTypeElement = (item) => {
-  //   const element = document.createElement('li');
-  //   const type = item.type;
-  //   const status = item.status;
-
-  //   const text = status ? type + ' ' + status : type;
-
-  //   // classes
-  //   element.classList.add('list__item');
-  //   element.classList.add(`type__${type}`);
-  //   if (status) element.classList.add(`status--${status}`);
-
-  //   // data-id
-  //   element.dataset.id = item.id;
-
-  //   // selected
-  //   if (item.selected) {
-  //     element.classList.add('type--active');
-  //     const classList = Array.from(element.classList);
-
-  //     // remove list__item
-  //     classList.shift();
-
-  //     // change theme to item type
-  //     this.itemType.className = '';
-  //     this.itemType.classList.add(...classList);
-  //     this.itemType.innerText = text.trim();
-
-  //     this.itemText.className = 'input-default';
-  //     this.itemText.classList.add(...classList);
-
-  //     this.itemBtn.className = 'button-default';
-  //     this.itemBtn.classList.add(...classList);
-  //   }
-
-  //   // text
-  //   element.innerText = text.trim();
-
-  //   return element;
-  // };
-
-  // getGroupElements() {
-  //   const groups = storage.getGroups();
-  //   return groups.map(this.getGroupElement);
-  // }
-
-  // getItemElements() {
-  //   const items = storage.getGroupItems();
-  //   return items.map(this.getItemElement);
-  // }
-
-  // getTypeElements() {
-  //   const types = storage.getTypes();
-  //   return types.map(this.getTypeElement);
-  // }
+    return recordItem;
+  }
 }
 
 export default Interface;
