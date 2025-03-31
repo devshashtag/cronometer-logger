@@ -1,4 +1,4 @@
-import { getTimestamp, timestampToTime, msToTime, getDate, getTime } from '/assets/js/modules/date.js';
+import { getTimestamp, timestampToTime, msToTime, getTime } from '/assets/js/modules/date.js';
 import { storage } from '/assets/js/script.js';
 
 class Interface {
@@ -10,8 +10,6 @@ class Interface {
     this.current = document.getElementById('current');
 
     this.history = document.getElementById('history');
-    this.record = this.history.querySelector('.history__record:nth-child(1)');
-    this.recordBtn = this.record.querySelector('.record__button');
   }
 
   // set date and time
@@ -48,6 +46,69 @@ class Interface {
     this.setTime(this.total, storage.getTotalDuration());
   }
 
+  generateHistoryRecords() {
+    let historyRecords = '';
+
+    const storageRecords = storage.getRecords();
+
+    for (const [date, records] of Object.entries(storageRecords).reverse()) {
+      const recordItems = records
+        .sort((currentRecord, nextRecord) => nextRecord.start - currentRecord.start)
+        .map(({ duration, start, end }) => {
+          return this.getRecordItem(duration, start, end);
+        })
+        .join('\n');
+
+      const historyRecord = this.getHistoryRecord(date, recordItems);
+      historyRecords += historyRecord;
+    }
+
+    // add today history record if not exist
+    if (!storageRecords[storage.currentDate]) {
+      historyRecords += this.getHistoryRecord(storage.currentDate);
+    }
+
+    this.history.insertAdjacentHTML('afterbegin', historyRecords);
+    this.record = this.history.querySelector('.history__record:nth-child(1)');
+    this.recordItems = this.record.querySelector('.record__items');
+    this.recordBtn = this.record.querySelector('.record__button');
+
+    // record button
+    this.recordBtn.addEventListener('click', () => {
+      this.play();
+    });
+
+    // toggle history-records button
+    this.history.addEventListener('click', (e) => {
+      const target = e.target;
+      const recordHistory = target.closest('.record__history');
+      const removeButton = target.closest('.option__remove');
+
+      if (recordHistory) {
+        const historyRecord = recordHistory.closest('.history__record');
+        const recordItems = historyRecord.querySelector('.record__items');
+
+        recordItems.classList.toggle('show');
+      } else if (removeButton) {
+        const historyRecord = removeButton.closest('.history__record');
+        const recordItem = removeButton.closest('.record__item');
+        // dataset
+        const dateData = historyRecord.querySelector('.record__date').dataset;
+        const durationData = recordItem.querySelector('.duration').dataset;
+        const startData = recordItem.querySelector('.start').dataset;
+        const endData = recordItem.querySelector('.end').dataset;
+
+        // record values
+        const date = Object.values(dateData).join('/');
+        const duration = Object.values(durationData).join(':');
+        const start = Object.values(startData).join(':');
+        const end = Object.values(endData).join(':');
+        const isRemoved = storage.removeRecord(date, { duration, start, end });
+        if (isRemoved) this.recordItems.removeChild(recordItem);
+      }
+    });
+  }
+
   updateOnRunning() {
     if (storage.isRunning()) {
       this.interval = setInterval(() => {
@@ -60,39 +121,14 @@ class Interface {
     }
   }
 
-  totalDuration() {
-    // recordItems
-    // for (const [date, records] of Object.entries(storage.getRecords())) {
-    //   // event: history toggle item
-    //   this.historyListElm = this.getHistoryList(date);
-    //   for (const [index, record] of Object.entries(records)) {
-    //     const item = this.getHistoryListItem(index, record);
-    //     this.historyListElm.children[0].insertAdjacentHTML('afterend', item);
-    //   }
-    //   // set total durations and records
-    //   this.setHistoryTitle(date);
-    // }
-    //
-    // this.historyListElm = this.getHistoryList(getDate());
-    //
-    // this.historyListElm.parentNode.parentNode.addEventListener('click', (e) => {
-    //   const parent = e.target.closest('.history__item');
-    //   if (parent) {
-    //     parent.querySelector('.history__list').classList.toggle('active');
-    //   }
-    // });
-    //
-  }
+  removeRecord() {}
 
   // initialize ui
   init() {
+    this.generateHistoryRecords();
     this.updateDateTime();
     this.updateDurations();
     this.updateOnRunning();
-
-    this.recordBtn.addEventListener('click', () => {
-      this.play();
-    });
   }
 
   play() {
@@ -107,12 +143,9 @@ class Interface {
       clearInterval(this.interval);
 
       // add record
-      const [index, record] = storage.saveCurrentRecord(getTimestamp());
-      // const item = this.getHistoryListItem(index, record);
-      // this.historyListElm.children[0].insertAdjacentHTML('afterend', item);
-
-      // set total durations and records
-      // this.setHistoryTitle();
+      const { duration, start, end } = storage.saveCurrentRecord(getTimestamp());
+      const item = this.getRecordItem(duration, start, end);
+      this.recordItems.insertAdjacentHTML('afterbegin', item);
     }
 
     // toggle play/pause
@@ -120,74 +153,64 @@ class Interface {
     this.recordBtn.classList.toggle('pause');
   }
 
-  setHistoryTitle(date) {
-    // set total durations and records
-
-    // const records = storage.getNumberOfRecords(date);
-    const title = this.historyListElm.parentNode.querySelector('.item__title');
-    const time = title.querySelector('.time');
-    const record = title.querySelector('.records');
-
-    // total durations
-    time.dataset.hour = dh;
-    time.dataset.minute = dm;
-    time.dataset.seconds = ds;
-
-    // number of records
-    record.dataset.records = records;
-  }
-
-  getHistoryList(date) {
+  getHistoryRecord(date, recordItems = '') {
     const [year, month, day] = date.split('/');
-    let historyList = document.querySelector(`.item__title[data-date="${date}"] + .history__list`);
 
-    if (!historyList) {
-      this.historyElm.insertAdjacentHTML(
-        'afterbegin',
-        `<!-- item -->
-        <div class="history__item">
-          <!-- display -->
-          <div class="item__title" data-date="${date}">
-            <span class="date" data-year="${year}" data-month="${month}" data-day="${day}"></span>
-            <span class="time" data-hour="00" data-minute="00" data-seconds="00" data-milliseconds="00"></span>
-            <span class="records" data-records="0"></span>
-          </div>
+    const historyRecord = `
+      <!-- record -->
+      <li class="history__record">
+        <!-- header -->
+        <div class="record__header">
+          <!-- record button -->
+          <svg class="record__button play">
+            <title>start recording</title>
+            <use href="/assets/icons/play.svg#play"></use>
+            <use href="/assets/icons/pause.svg#pause"></use>
+          </svg>
+          <!-- indicator -->
+          <ul class="record__indicator">
+          </ul>
+          <!-- date -->
+          <div class="record__date" data-year="${year}" data-month="${month}" data-day="${day}"></div>
+          <!-- show history -->
+          <svg class="record__history">
+            <title>show history</title>
+            <use href="assets/icons/history.svg#history"></use>
+          </svg>
+        </div>
+        <!-- items -->
+        <ul class="record__items">
+          ${recordItems}
+        </ul>
+      </li>
+    `;
 
-
-          <!-- list -->
-          <div class="history__list">
-            <!-- columns -->
-            <div class="list__columns">
-              <span>start</span>
-              <span>duration</span>
-              <span>end</span>
-            </div>
-
-          </div>
-        </div>`
-      );
-
-      historyList = document.querySelector(`.item__title[data-date="${date}"] + .history__list`);
-    }
-
-    return historyList;
+    return historyRecord;
   }
 
-  getHistoryListItem(index, record) {
-    const [sh, sm, ss, sms] = timestampToTime(record.start).split(':');
-    const [eh, em, es, ems] = timestampToTime(record.end).split(':');
-    const [dh, dm, ds, dms] = msToTime(record.duration).split(':');
+  getRecordItem(duration, start, end) {
+    const [durationHour, durationMinute, durationSeconds] = msToTime(duration).split(':');
+    const [startHour, startMinute, startSeconds] = timestampToTime(start).split(':');
+    const [endHour, endMinute, endSeconds] = timestampToTime(end).split(':');
 
-    const historyItem = `
-    <!-- item -->
-    <div class="list__item" data-index="${index}">
-      <span class="time start" data-hour="${sh}" data-minute="${sm}" data-seconds="${ss}" data-milliseconds="${sms}"></span>
-      <span class="time duration" data-hour="${dh}" data-minute="${dm}" data-seconds="${ds}" data-milliseconds="${dms}"></span>
-      <span class="time end" data-hour="${eh}" data-minute="${em}" data-seconds="${es}" data-milliseconds="${ems}"></span>
-      <svg class="item--remove"><use href="assets/icons/remove.svg#remove"></use>
-    </div>`;
+    const recordItem = `
+      <!-- record -->
+      <li class="record__item">
+        <span class="record__time duration" title="duration" data-hour="${durationHour}" data-minute="${durationMinute}" data-seconds="${durationSeconds}"></span>
+        <span class="record__time start" title="start" data-hour="${startHour}" data-minute="${startMinute}" data-seconds="${startSeconds}"></span>
+        <span class="record__time end" title="end" data-hour="${endHour}" data-minute="${endMinute}" data-seconds="${endSeconds}"></span>
 
-    return historyItem;
+        <span class="record__options">
+          <!-- remove -->
+          <svg class="option__remove">
+            <title>remove record</title>
+            <use href="assets/icons/remove.svg#remove"></use>
+          </svg>
+        </span>
+      </li>
+    `;
+
+    return recordItem;
   }
 }
 

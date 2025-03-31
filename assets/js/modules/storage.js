@@ -1,4 +1,4 @@
-import { getDate, getTimestamp, msToTime } from '/assets/js/modules/date.js';
+import { getDate, getTimestamp, msToTime, timestampToTime } from '/assets/js/modules/date.js';
 
 class Storage {
   constructor(configName = 'config') {
@@ -58,7 +58,7 @@ class Storage {
   saveCurrentRecord(end) {
     const { start, date } = this.config.current;
     const duration = end - start;
-    const record = { start, end, duration };
+    const record = { duration, start, end };
 
     this.config.current = {};
     this.config.records[date] ??= [];
@@ -66,14 +66,37 @@ class Storage {
     this.config.running = false;
     this.saveConfig();
 
-    const index = this.config.records[date].length;
-
-    return [index, record];
+    return record;
   }
 
   // records
   getRecords() {
     return this.config.records ?? {};
+  }
+
+  removeRecord(date, { duration, start, end }) {
+    if (!this.config.records[date]) {
+      console.warn(`No records found for date: ${date}`);
+      return false;
+    }
+
+    const recordIndex = this.config.records[date].findIndex((record) => {
+      return msToTime(record.duration) === duration && timestampToTime(record.start) === start && timestampToTime(record.end) === end;
+    });
+
+    if (recordIndex !== -1) {
+      this.config.records[date].splice(recordIndex, 1);
+
+      if (this.config.records[date].length === 0) {
+        delete this.config.records[date];
+      }
+
+      this.saveConfig();
+      return true;
+    }
+
+    console.warn('No matching record found to remove');
+    return false;
   }
 
   // records by date
@@ -132,8 +155,6 @@ class Storage {
       return msToTime(getTimestamp() - current + today);
     }
   }
-
-  removeRecord() {}
 }
 
 export default Storage;
