@@ -3,7 +3,9 @@ import { getDate, getTimestamp, msToTime } from '/assets/js/modules/date.js';
 class Storage {
   constructor(configName = 'config') {
     this.configName = configName;
+    this.updateOldConfig();
     this.loadConfig();
+    this.currentDate = getDate();
   }
 
   loadConfig() {
@@ -24,8 +26,20 @@ class Storage {
     this.saveConfig();
   }
 
+  updateOldConfig(oldConfigName = 'config') {
+    if (oldConfigName === this.configName) return;
+
+    // migrate to new config
+    const oldConfig = localStorage.getItem(oldConfigName);
+    const newConfig = localStorage.getItem(this.configName);
+
+    if (oldConfig && !newConfig) {
+      localStorage.setItem(this.configName, oldConfig);
+    }
+  }
+
   saveConfig() {
-    localStorage.setItem('cronometer-logger', JSON.stringify(this.config));
+    localStorage.setItem(this.configName, JSON.stringify(this.config));
   }
 
   // running
@@ -34,10 +48,8 @@ class Storage {
   }
 
   // set current record
-  setCurrentRecord(start, date = getDate()) {
-    const current = { start, date };
-
-    this.config.current = current;
+  setCurrentRecord(start, date = this.currentDate) {
+    this.config.current = { start, date };
     this.config.running = true;
     this.saveConfig();
   }
@@ -54,7 +66,9 @@ class Storage {
     this.config.running = false;
     this.saveConfig();
 
-    return record;
+    const index = this.config.records[date].length;
+
+    return [index, record];
   }
 
   // records
@@ -63,17 +77,17 @@ class Storage {
   }
 
   // records by date
-  getRecordsByDate(date = getDate()) {
+  getRecordsByDate(date = this.currentDate) {
     return this.config.records[date] ?? [];
   }
 
   // number of records
-  getNumberOfRecords(date = getDate()) {
+  getNumberOfRecords(date = this.currentDate) {
     return this.getRecordsByDate(date).length;
   }
 
   // sum of durations
-  getDurations(date = getDate()) {
+  getDurations(date = this.currentDate) {
     let durations = 0;
 
     for (const duration of this.getRecordsByDate(date).map((record) => record.duration)) {
@@ -83,10 +97,43 @@ class Storage {
     return durations;
   }
 
-  // get current Time
-  getCurrentTime(date = getDate()) {
-    return msToTime(getTimestamp() - this.config.current.start + this.getDurations(date));
+  getTotalDuration() {
+    const records = Object.values(this.getRecords()).flat();
+    const durations = records.map((record) => record.duration);
+    const total = durations.reduce((a, b) => a + b, 0);
+
+    // current record
+    let current = this.config?.current?.start ?? 0;
+
+    if (current !== 0) {
+      current = getTimestamp() - current;
+    }
+
+    return msToTime(total + current);
   }
+
+  getCurrentDuration() {
+    const current = this.config?.current?.start ?? 0;
+
+    if (current === 0) {
+      return msToTime(0);
+    } else {
+      return msToTime(getTimestamp() - current);
+    }
+  }
+
+  getTodayDuration(date = this.currentDate) {
+    const current = this.config?.current?.start ?? 0;
+    const today = this.getDurations(date);
+
+    if (current === 0) {
+      return msToTime(today);
+    } else {
+      return msToTime(getTimestamp() - current + today);
+    }
+  }
+
+  removeRecord() {}
 }
 
 export default Storage;

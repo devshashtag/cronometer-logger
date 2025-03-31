@@ -1,6 +1,11 @@
 // sizes
-$max-width: 1980px;
+// page
+$max-width: 1920px;
 $transition-duration: 0.2s;
+
+// scrollbar
+$scroll-bar-height: 0.8rem;
+$scroll-bar-width: 0.5rem;
 
 // colors
 $theme-white: #e0e0e0;
@@ -41,6 +46,11 @@ $theme-hover: $theme-gray-2;
 $theme-header: $theme-black-3;
 $theme-header-shadow: $theme-black-3;
 
+$theme-record: #8fcbae;
+$theme-record-fg: $theme-yellow;
+$theme-record-items: $theme-gray-4;
+
 // scrollbar
-$theme-scrollbar: transparent;
-$theme-scrollbar-bar: $theme-gray-7;
+$scroll-bar: #8f8f8f;
+$scroll-bar-hover: #9c9c9c;
+$scroll-bar-bg: #606060;

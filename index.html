@@ -5,34 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- title -->
-    <title>cronometer plus</title>
-
-    <!-- font awesome -->
-    <link href="https://use.fontawesome.com/releases/v5.15.1/css/all.css" rel="stylesheet" />
+    <title>cronometer</title>
 
     <!-- styles -->
     <link rel="stylesheet" href="/assets/css/styles.css" />
   </head>
 
   <body>
-    <!-- header -->
-    <header class="header"></header>
-
     <!-- main -->
     <main class="main">
       <section class="main__cronometer">
-        <div class="cronometer__container">
-          <div class="cronometer__display">
-            <div class="date" id="date"></div>
-            <div class="time fa-pause" id="cronometer"></div>
+        <!-- status -->
+        <div class="cronometer__status">
+          <div class="status__datetime">
+            <span class="status__date" id="date"></span>
+            <span class="status__time" id="time"></span>
           </div>
-
-          <div class="cronometer__controls">
-            <i class="fa fa-play" id="play"></i>
-            <i class="fa fa-stop" id="stop"></i>
+          <div class="status__durations">
+            <div class="status__total">total: <span class="total__time" id="total"></span></div>
+            <div class="status__today">today: <span class="today__time" id="today"></span></div>
+            <div class="status__current">current: <span class="current__time" id="current"></span></div>
           </div>
         </div>
-        <div class="cronometer__history"></div>
+        <!-- history -->
+        <ul class="cronometer__history" id="history">
+          <!-- record -->
+          <li class="history__record">
+            <!-- header -->
+            <div class="record__header">
+              <!-- record button -->
+              <svg class="record__button play">
+                <title>start recording</title>
+                <use href="/assets/icons/play.svg#play"></use>
+                <use href="/assets/icons/pause.svg#pause"></use>
+              </svg>
+              <!-- indicator -->
+              <ul class="record__indicator">
+                <li class="record__item"></li>
+              </ul>
+              <!-- date -->
+              <div class="record__date"></div>
+              <!-- show history -->
+              <svg class="record__history">
+                <title>show history</title>
+                <use href="assets/icons/history.svg#history"></use>
+              </svg>
+            </div>
+            <!-- items -->
+            <ul class="record__items">
+              <!-- record -->
+              <li class="record__item">
+                <span class="record__time duration" title="duration"></span>
+                <span class="record__time start" title="start"></span>
+                <span class="record__time end" title="end"></span>
+
+                <span class="record__options">
+                  <!-- remove -->
+                  <svg class="option__remove">
+                    <title>remove record</title>
+                    <use href="assets/icons/remove.svg#remove"></use>
+                  </svg>
+                </span>
+              </li>
+            </ul>
+          </li>
+        </ul>
       </section>
     </main>
 

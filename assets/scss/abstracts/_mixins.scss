@@ -21,6 +21,6 @@
       @content;
     }
   } @else {
-    @warn "breakpoint mixin supports: xs, sm, md, lg, xl, xxl";
+    @warn "breakpoint mixin supports: sm, md, lg, xl, xxl";
   }
 }
