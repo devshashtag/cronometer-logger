@@ -84,8 +84,8 @@ main.main {
         fill: $theme-green;
       }
 
-      &.pause {
-        fill: $theme-orange;
+      &.stop {
+        fill: $theme-red;
       }
     }
   }
@@ -110,7 +110,7 @@ main.main {
         display: block;
       }
 
-      &.pause use:nth-of-type(2) {
+      &.stop use:nth-of-type(2) {
         display: block;
       }
     }

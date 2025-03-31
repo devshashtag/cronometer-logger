@@ -124,9 +124,9 @@ class Interface {
         this.updateDurations();
       }, 100);
 
-      // toggle to pause
+      // toggle to stop
       this.recordBtn.classList.toggle('play');
-      this.recordBtn.classList.toggle('pause');
+      this.recordBtn.classList.toggle('stop');
     }
   }
 
@@ -158,9 +158,9 @@ class Interface {
       this.recordItems.insertAdjacentHTML('afterbegin', item);
     }
 
-    // toggle play/pause
+    // toggle play/stop
     this.recordBtn.classList.toggle('play');
-    this.recordBtn.classList.toggle('pause');
+    this.recordBtn.classList.toggle('stop');
   }
 
   getHistoryRecord(date, recordItems = '') {
@@ -175,7 +175,7 @@ class Interface {
           <svg class="record__button play">
             <title>start recording</title>
             <use href="/assets/icons/play.svg#play"></use>
-            <use href="/assets/icons/pause.svg#pause"></use>
+            <use href="/assets/icons/stop.svg#stop"></use>
           </svg>
           <!-- indicator -->
           <ul class="record__indicator">
