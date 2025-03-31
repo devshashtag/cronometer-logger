@@ -50,8 +50,13 @@ class Interface {
     let historyRecords = '';
 
     const storageRecords = storage.getRecords();
+    const sortedRecords = Object.entries(storageRecords).sort(([currentDate], [nextDate]) => {
+      const currentNum = parseInt(currentDate.replace(/\//g, ''));
+      const nextNum = parseInt(nextDate.replace(/\//g, ''));
+      return nextNum - currentNum;
+    });
 
-    for (const [date, records] of Object.entries(storageRecords).reverse()) {
+    for (const [date, records] of sortedRecords) {
       const recordItems = records
         .sort((currentRecord, nextRecord) => nextRecord.start - currentRecord.start)
         .map(({ duration, start, end }) => {
@@ -65,14 +70,16 @@ class Interface {
 
     // add today history record if not exist
     if (!storageRecords[storage.currentDate]) {
-      historyRecords += this.getHistoryRecord(storage.currentDate);
+      historyRecords = this.getHistoryRecord(storage.currentDate) + historyRecords;
     }
 
     this.history.insertAdjacentHTML('afterbegin', historyRecords);
     this.record = this.history.querySelector('.history__record:nth-child(1)');
     this.recordItems = this.record.querySelector('.record__items');
     this.recordBtn = this.record.querySelector('.record__button');
+  }
 
+  setHistoryEvents() {
     // record button
     this.recordBtn.addEventListener('click', () => {
       this.play();
@@ -92,6 +99,7 @@ class Interface {
       } else if (removeButton) {
         const historyRecord = removeButton.closest('.history__record');
         const recordItem = removeButton.closest('.record__item');
+        const recordItems = removeButton.closest('.record__items');
         // dataset
         const dateData = historyRecord.querySelector('.record__date').dataset;
         const durationData = recordItem.querySelector('.duration').dataset;
@@ -104,7 +112,8 @@ class Interface {
         const start = Object.values(startData).join(':');
         const end = Object.values(endData).join(':');
         const isRemoved = storage.removeRecord(date, { duration, start, end });
-        if (isRemoved) this.recordItems.removeChild(recordItem);
+        if (isRemoved) recordItems.removeChild(recordItem);
+        this.updateDurations();
       }
     });
   }
@@ -126,6 +135,7 @@ class Interface {
   // initialize ui
   init() {
     this.generateHistoryRecords();
+    this.setHistoryEvents();
     this.updateDateTime();
     this.updateDurations();
     this.updateOnRunning();
