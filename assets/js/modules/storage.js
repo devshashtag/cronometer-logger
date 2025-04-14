@@ -1,11 +1,16 @@
-import { getDate, getTimestamp, msToTime, timestampToTime } from '/cronometer-logger/assets/js/modules/date.js';
+import {
+  getDate,
+  getTimestamp,
+  msToTime,
+  timestampToTime,
+} from '/cronometer-logger/assets/js/modules/date.js';
 
 class Storage {
   constructor(configName = 'config') {
     this.configName = configName;
+    this.currentDate = getDate();
     this.updateOldConfig();
     this.loadConfig();
-    this.currentDate = getDate();
   }
 
   loadConfig() {
@@ -16,11 +21,11 @@ class Storage {
       version: '0.1',
     };
 
-    // load config if exist
-    const config = localStorage.getItem(this.configName);
+    // load local config if exist
+    const localConfig = localStorage.getItem(this.configName);
 
-    if (config && JSON.parse(config).version == this.config.version) {
-      this.config = JSON.parse(config);
+    if (localConfig) {
+      this.config = JSON.parse(localConfig);
     }
 
     this.saveConfig();
@@ -81,7 +86,11 @@ class Storage {
     }
 
     const recordIndex = this.config.records[date].findIndex((record) => {
-      return msToTime(record.duration) === duration && timestampToTime(record.start) === start && timestampToTime(record.end) === end;
+      return (
+        msToTime(record.duration) === duration &&
+        timestampToTime(record.start) === start &&
+        timestampToTime(record.end) === end
+      );
     });
 
     if (recordIndex !== -1) {
@@ -154,6 +163,69 @@ class Storage {
     } else {
       return msToTime(getTimestamp() - current + today);
     }
+  }
+
+  downloadConfig(filename = 'cronometer.json') {
+    const data = JSON.stringify(this.config, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+
+    document.body.appendChild(a);
+    a.click();
+
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+  }
+
+  async uploadConfig() {
+    return new Promise((resolve, reject) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) {
+          reject(new Error('No file selected'));
+          return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+          try {
+            const config = JSON.parse(event.target.result);
+
+            // Basic validation
+            if (!config || typeof config !== 'object') {
+              throw new Error('Invalid config file');
+            }
+
+            // Merge with existing config (preserve current records)
+            this.config = config;
+
+            this.saveConfig();
+            resolve(true);
+          } catch (error) {
+            reject(error);
+          }
+        };
+
+        reader.onerror = () => {
+          reject(new Error('Error reading file'));
+        };
+
+        reader.readAsText(file);
+      };
+
+      input.click();
+    });
   }
 }
 

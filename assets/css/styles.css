@@ -127,6 +127,7 @@ main.main section.main__cronometer {
   overflow: auto;
 }
 main.main .cronometer__status {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -157,6 +158,26 @@ main.main .cronometer__status .today__time {
 }
 main.main .cronometer__status .current__time {
   color: #b1dbff;
+}
+main.main .cronometer__status .status__config {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+main.main .cronometer__status .config__upload,
+main.main .cronometer__status .config__download {
+  cursor: pointer;
+  fill: #e0e0e0;
+}
+main.main .cronometer__status .config__upload:hover,
+main.main .cronometer__status .config__download:hover {
+  background-color: #808080;
+}
+main.main .cronometer__status .config__upload {
+  padding: 0.9rem;
 }
 main.main .cronometer__history {
   display: flex;

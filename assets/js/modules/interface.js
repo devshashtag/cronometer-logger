@@ -1,4 +1,9 @@
-import { getTimestamp, timestampToTime, msToTime, getTime } from '/cronometer-logger/assets/js/modules/date.js';
+import {
+  getTimestamp,
+  timestampToTime,
+  msToTime,
+  getTime,
+} from '/cronometer-logger/assets/js/modules/date.js';
 import { storage } from '/cronometer-logger/assets/js/script.js';
 
 class Interface {
@@ -118,6 +123,20 @@ class Interface {
     });
   }
 
+  setConfigEvents() {
+    const download = document.getElementById('download');
+    const upload = document.getElementById('upload');
+
+    download.addEventListener('click', () => {
+      storage.downloadConfig();
+    });
+
+    upload.addEventListener('click', async () => {
+      await storage.uploadConfig();
+      window.location.reload();
+    });
+  }
+
   updateOnRunning() {
     if (storage.isRunning()) {
       this.interval = setInterval(() => {
@@ -130,12 +149,11 @@ class Interface {
     }
   }
 
-  removeRecord() {}
-
   // initialize ui
   init() {
     this.generateHistoryRecords();
     this.setHistoryEvents();
+    this.setConfigEvents();
     this.updateDateTime();
     this.updateDurations();
     this.updateOnRunning();
