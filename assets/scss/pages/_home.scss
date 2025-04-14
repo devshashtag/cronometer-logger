@@ -27,6 +27,7 @@ main.main {
   }
 
   .cronometer__status {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -66,6 +67,30 @@ main.main {
 
     .current__time {
       color: $theme-blue;
+    }
+
+    .status__config {
+      position: absolute;
+      right: 0;
+      top: 0;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .config__upload,
+    .config__download {
+      cursor: pointer;
+      fill: $theme-white;
+
+      &:hover {
+        background-color: $theme-gray-7;
+      }
+    }
+
+    .config__upload {
+      padding: 0.9rem;
     }
   }
 
